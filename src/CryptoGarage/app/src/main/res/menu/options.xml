@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_reboot"
+        android:icon="@android:drawable/ic_menu_rotate"
+        android:title="Reboot"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_app_restart"
+        android:icon="@android:drawable/ic_popup_sync"
+        android:title="Restart App"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="Settings" />
+    <item
+        android:id="@+id/menu_about"
+        android:title="About" />
+</menu>

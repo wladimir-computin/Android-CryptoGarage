@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.wear.widget.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.constraint.Guideline
+            android:id="@+id/mid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="20dp"
+            app:layout_constraintGuide_percent="0.15" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/div"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.4" />
+
+        <TextView
+            android:id="@+id/settings_devpass_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingEnd="5dp"
+            android:text="@string/settings_devpass_textview"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/colorAccent"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/settings_devpass_text"
+            app:layout_constraintRight_toRightOf="@+id/div"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/settings_devpass_text"
+            app:layout_gravity="left|center_vertical" />
+
+        <EditText
+            android:id="@+id/settings_devpass_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:hint="@string/settings_devpass_text_hint"
+            android:inputType="textVisiblePassword"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textSize="12sp"
+            app:layout_constraintLeft_toRightOf="@+id/div"
+            app:layout_constraintTop_toBottomOf="@+id/mid"
+            app:layout_gravity="left|center_vertical" />
+
+        <TextView
+            android:id="@+id/settings_wlanssid_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingEnd="5dp"
+            android:text="@string/settings_wlanssid_textview"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/colorAccent"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/settings_wlanssid_text"
+            app:layout_constraintRight_toRightOf="@+id/div"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/settings_wlanssid_text"
+            app:layout_gravity="left|center_vertical" />
+
+        <EditText
+            android:id="@+id/settings_wlanssid_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/settings_wlanssid_text_hint"
+            android:inputType="text"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textSize="12sp"
+            app:layout_constraintLeft_toRightOf="@+id/div"
+            app:layout_constraintTop_toBottomOf="@+id/settings_devpass_text" />
+
+        <TextView
+            android:id="@+id/setting_wlanpass_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingEnd="5dp"
+            android:text="@string/settings_wlanpass_textview"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/colorAccent"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/settings_wlanpass_text"
+            app:layout_constraintRight_toRightOf="@+id/div"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/settings_wlanpass_text"
+            app:layout_gravity="left|center_vertical" />
+
+        <EditText
+            android:id="@+id/settings_wlanpass_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:hint="@string/settings_wlanpass_text_hint"
+            android:inputType="textVisiblePassword"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textSize="12sp"
+            app:layout_constraintLeft_toRightOf="@+id/div"
+            app:layout_constraintTop_toBottomOf="@+id/settings_wlanssid_text" />
+
+        <Button
+            android:id="@+id/settings_save_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="save_click"
+            android:text="Save"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_gravity="bottom|center" />
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.wear.widget.BoxInsetLayout>

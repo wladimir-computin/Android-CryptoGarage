@@ -1,0 +1,22 @@
+<resources>
+    <string name="message_begin" translatable="false">[BEGIN]</string>
+    <string name="message_end" translatable="false">[END]</string>
+    <string name="response_ok" translatable="false">OK</string>
+    <string name="response_data" translatable="false">DATA</string>
+    <string name="response_error" translatable="false">FAIL</string>
+    <string name="command_hello" translatable="false">hellofriend</string>
+    <string name="command_trigger" translatable="false">trigger</string>
+    <string name="command_autotrigger" translatable="false">autotrigger</string>
+    <string name="command_setDevicePass" translatable="false">setDevicePass:</string>
+    <string name="command_setSSID" translatable="false">setSSID:</string>
+    <string name="command_setWifiPass" translatable="false">setWIFIPass:</string>
+    <string name="command_setAutotriggerTimeout" translatable="false">setAutotriggerTimeout:</string>
+    <string name="command_getStatus" translatable="false">getStatus</string>
+    <string name="command_ping" translatable="false">ping</string>
+    <string name="command_save" translatable="false">save</string>
+    <string name="command_reboot" translatable="false">reboot</string>
+    <string name="command_reset" translatable="false">reset</string>
+    <string name="command_status" translatable="false">getStatus</string>
+    <string name="command_update" translatable="false">update</string>
+    <string name="static_ip" translatable="false">192.168.4.1</string>
+</resources>

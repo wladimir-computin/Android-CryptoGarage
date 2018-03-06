@@ -1,0 +1,132 @@
+package de.wladimircomputin.cryptogarage;
+
+import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.os.Binder;
+import android.os.IBinder;
+
+import de.wladimircomputin.cryptogarage.util.WiFi;
+import de.wladimircomputin.libcryptogarage.protocol.CryptCon;
+import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
+
+public class GarageService extends Service {
+    private final IBinder binder = new LocalBinder();
+    private CryptCon cc;
+    private WiFi wifi;
+    private String devPass;
+    private String ssid;
+    private String pass;
+
+    private GarageServiceCallbacks callbacks;
+
+    public class LocalBinder extends Binder {
+        GarageService getService() {// Return this instance of LocalService so clients can call public methods
+            return GarageService.this;
+        }
+    }
+
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
+    /** method for clients */
+    public void init(String devPass, String ssid, String pass, GarageServiceCallbacks callbacks) {
+        this.devPass = devPass;
+        this.ssid = ssid;
+        this.pass = pass;
+        this.callbacks = callbacks;
+        wifi = new WiFi(this.getApplicationContext());
+        cc = new CryptCon(devPass, this);
+    }
+
+    public void setCallbacks(GarageServiceCallbacks callbacks) {
+        this.callbacks = callbacks;
+    }
+
+    public void init_wifi(BroadcastReceiver receiver, boolean aggressiveConnect){
+        wifi.setWifiEnabled(true);
+        try {
+            this.registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        } catch (Exception x){}
+        if(!wifi.isConnectedTo(ssid)) {
+            wifi.connectToSSID(ssid, pass);
+            if(aggressiveConnect){
+                wifi.aggressiveConnect(ssid);
+            }
+            callbacks.wifiDisconnected();
+        } else {
+            callbacks.wifiConnected();
+        }
+    }
+
+    public BroadcastReceiver wifi_init_receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context arg0, Intent arg1) {
+            if (wifi.isConnectedTo(ssid)) {
+                callbacks.wifiConnected();
+            } else {
+                callbacks.wifiDisconnected();
+            }
+        }
+    };
+
+    public void trigger(final CryptConReceiver c){
+        callbacks.triggerStart();
+        if(wifi.isConnectedTo(ssid)){
+            cc.sendMessageEncrypted(getString(R.string.command_trigger), new CryptConReceiver() {
+                @Override
+                public void onSuccess(String response) {
+                    c.onSuccess(response);
+                }
+
+                @Override
+                public void onFail() {
+                    c.onFail();
+                }
+
+                @Override
+                public void onFinished() {
+                    c.onFinished();
+                }
+
+                @Override
+                public void onProgress(String sprogress, int iprogress) {
+                    c.onProgress(sprogress, iprogress);
+                }
+            });
+        } else {
+
+        }
+    }
+
+    public void reboot(final CryptConReceiver c){
+        cc.sendMessageEncrypted(getString(R.string.command_reboot), new CryptConReceiver() {
+            @Override
+            public void onSuccess(String response) {
+                c.onSuccess(response);
+            }
+
+            @Override
+            public void onFail() {
+                c.onFail();
+            }
+
+            @Override
+            public void onFinished() {
+                c.onFinished();
+            }
+
+            @Override
+            public void onProgress(String sprogress, int iprogress) {
+                c.onProgress(sprogress, iprogress);
+            }
+        });
+    }
+}

@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name" translatable="false">Garage</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="settings_devpass_textview">Geräte-Passwort</string>
+    <string name="settings_devpass_textview_sub">Muss mit der Garage übereinstimmen.</string>
+    <string name="settings_devpass_text_hint">Passwort (8-64)</string>
+    <string name="settings_wlanssid_textview">WLAN-SSID</string>
+    <string name="settings_wlanssid_textview_sub">Netzwerkname der Garage</string>
+    <string name="settings_wlanssid_text_hint">SSID (3-32)</string>
+    <string name="settings_wlanpass_textview">WLAN-Passwort</string>
+    <string name="settings_wlanpass_textview_sub">WPA2-Passwort der Garage</string>
+    <string name="settings_wlanpass_text_hint">WPA2-PSK (8-63)</string>
+    <string name="settings_autotrigger_timeout_textview">Auto. Timeout</string>
+    <string name="settings_autotrigger_timeout_textview_sub">Zeit nach dem Disconnect bis die Garage schließt</string>
+    <string name="settings_autotrigger_timeout_text_hint">Sekunden (0-9999)</string>
+
+    <string name="preference_file_key" translatable="false">de.wladimircomputin.cryptogarage.settings</string>
+    <string name="preference_devpass_key" translatable="false">devpass</string>
+    <string name="preference_wlanssid_key" translatable="false">wlanssid</string>
+    <string name="preference_wlanpass_key" translatable="false">wlanpass</string>
+    <string name="preference_autotrigger_timeout_key" translatable="false">autotrigger_timeout</string>
+    <string name="preference_devpass_default" translatable="false">TestTest1</string>
+    <string name="preference_wlanssid_default" translatable="false">GarageTest</string>
+    <string name="preference_wlanpass_default" translatable="false">12345670</string>
+    <string name="preference_autotrigger_timeout_default" translatable="false">10</string>
+    <string name="triggerButton_Text">AUF / ZU</string>
+    <string name="autotriggerButton_Text">AUTOMATIK</string>
+    <string name="about_author">Code &amp; Design: David Wischnjak</string>
+    <string name="about_source">Source: https://github.com/wladimir-computin/ESP8266-CryptoGarage</string>
+
+</resources>

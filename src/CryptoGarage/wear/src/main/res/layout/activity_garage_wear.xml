@@ -1,0 +1,31 @@
+
+<FrameLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/root"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/colorControlHighlight"
+            android:clipChildren="true">
+
+    <ProgressBar
+        android:id="@+id/triggerButton_Progress"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="0dp"
+        android:max="1000"
+        android:padding="0dp"
+        android:progressDrawable="@drawable/circular_progressbar"
+        android:rotation="-90" />
+
+    <Button
+        android:id="@+id/triggerButton"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
+        android:background="@drawable/circle"
+        android:hapticFeedbackEnabled="false"
+        android:onClick="trigger_click"
+        android:text="@string/triggerButton_Text"
+        android:textSize="20sp" />
+        </FrameLayout>
