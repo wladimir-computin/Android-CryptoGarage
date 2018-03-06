@@ -30,7 +30,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import de.wladimircomputin.cryptogarage.util.WiFi;
-import de.wladimircomputin.libcryptogarage.BuildConfig;
+import de.wladimircomputin.cryptogarage.BuildConfig;
 import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
 
 public class MainActivity extends AppCompatActivity implements GarageServiceCallbacks{

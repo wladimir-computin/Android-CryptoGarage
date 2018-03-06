@@ -26,6 +26,6 @@
     <string name="triggerButton_Text">AUF / ZU</string>
     <string name="autotriggerButton_Text">AUTOMATIK</string>
     <string name="about_author">Code &amp; Design: David Wischnjak</string>
-    <string name="about_source">Source: https://github.com/wladimir-computin/ESP8266-CryptoGarage</string>
+    <string name="about_source">Source: https://github.com/wladimir-computin/Android-CryptoGarage</string>
 
 </resources>
