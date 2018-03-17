@@ -67,14 +67,20 @@ public class WiFi {
     }
 
     private int getNetId(String ssid){
-        while(wifiManager.getConfiguredNetworks() == null){
-            try {this.wait(100);} catch (Exception x){break;}
-        }
-        for (WifiConfiguration wifiConfiguration : wifiManager.getConfiguredNetworks()) {
-            if (wifiConfiguration.SSID.equals("\"" + ssid + "\"")) {
-                return wifiConfiguration.networkId;
+        try {
+            while (wifiManager.getConfiguredNetworks() == null) {
+                try {
+                    this.wait(100);
+                } catch (Exception x) {
+                    break;
+                }
             }
-        }
+            for (WifiConfiguration wifiConfiguration : wifiManager.getConfiguredNetworks()) {
+                if (wifiConfiguration.SSID.equals("\"" + ssid + "\"")) {
+                    return wifiConfiguration.networkId;
+                }
+            }
+        } catch (Exception x){}
         return -1;
     }
 

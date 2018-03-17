@@ -30,7 +30,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import de.wladimircomputin.cryptogarage.util.WiFi;
-import de.wladimircomputin.cryptogarage.BuildConfig;
 import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
 
 public class MainActivity extends AppCompatActivity implements GarageServiceCallbacks{
@@ -197,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         garage.trigger(new CryptConReceiver() {
             @Override
             public void onSuccess(String response) {
-                runOnUiThread(() -> setProgressIndeterminate(false));
+                setProgressIndeterminate(false);
             }
 
             @Override
@@ -385,14 +384,19 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
 
     @Override
     public void wifiConnected() {
-        triggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
-        autotriggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
+        runOnUiThread(() -> {
+            triggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
+            autotriggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
+        });
     }
 
     @Override
     public void wifiDisconnected() {
-        triggerButton.setTextColor(Color.GRAY);
-        autotriggerButton.setTextColor(Color.GRAY);
+        runOnUiThread(() -> {
+            triggerButton.setTextColor(Color.GRAY);
+            autotriggerButton.setTextColor(Color.GRAY);
+        });
+
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {

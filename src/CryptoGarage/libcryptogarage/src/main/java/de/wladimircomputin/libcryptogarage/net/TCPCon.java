@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import de.wladimircomputin.libcryptogarage.R;
@@ -63,11 +64,11 @@ public class TCPCon {
 
     public boolean connect(String ip, int port) throws IOException{
         if(socket == null || !socket.isConnected()) {
-            socket = new Socket(ip, port);
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(ip, port), 500);
             //socket.setTcpNoDelay(true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-            socket.setSoTimeout(500);
         }
         return socket.isConnected();
     }

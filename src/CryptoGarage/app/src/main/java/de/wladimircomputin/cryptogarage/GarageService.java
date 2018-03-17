@@ -6,10 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Vibrator;
+import android.util.Log;
 
 import de.wladimircomputin.cryptogarage.util.Awake;
 import de.wladimircomputin.cryptogarage.util.GaragePing;
@@ -69,7 +73,7 @@ public class GarageService extends Service {
     public void init_wifi(BroadcastReceiver receiver, boolean aggressiveConnect){
         wifi.setWifiEnabled(true);
         try {
-            this.registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+            this.registerReceiver(receiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
         } catch (Exception x){}
         if(!wifi.isConnectedTo(ssid)) {
             wifi.connectToSSID(ssid, pass);
@@ -95,31 +99,45 @@ public class GarageService extends Service {
         }
     };
 
+    private int failcount = 0;
     public BroadcastReceiver autotrigger_receiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context arg0, Intent arg1) {
             if(wifi.isConnectedTo(ssid) && !autotrigger_active) {
-                callbacks.autotriggerStart();
-                trigger(new CryptConReceiver() {
-                    @Override
-                    public void onSuccess(String response) {
-                        vib.vibrate(new long[] {0, 200}, -1);
-                    }
-                    @Override
-                    public void onFail() {
-                        //wait and again
-                    }
-                    @Override
-                    public void onFinished() {
-                        callbacks.setProgress("autotrigger", -1);
-                    }
-                    @Override
-                    public void onProgress(String sprogress, int iprogress) {
-                        callbacks.logMessage(sprogress);
-                        callbacks.setProgress("autotrigger", iprogress);
-                    }
-                });
+                NetworkInfo info = arg1.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                if(info != null && info.isConnected()){
+                    autotriggerStopSearch();
+                    new Handler().postDelayed(() -> {
+                        callbacks.autotriggerStart();
+                        trigger(new CryptConReceiver() {
+                            @Override
+                            public void onSuccess(String response) {
+                                vib.vibrate(new long[]{0, 200}, -1);
+                                failcount = 0;
+                            }
+
+                            @Override
+                            public void onFail() {
+                                failcount++;
+                                if(failcount < 4)
+                                    Looper.prepare();
+                                    onReceive(arg0, arg1); //wait and try again
+                            }
+
+                            @Override
+                            public void onFinished() {
+                                callbacks.setProgress("autotrigger", -1);
+                            }
+
+                            @Override
+                            public void onProgress(String sprogress, int iprogress) {
+                                callbacks.logMessage(sprogress);
+                                callbacks.setProgress("autotrigger", iprogress);
+                            }
+                        });
+                    }, 250); //Because the intent is send a little bit too early
+                }
             } else if (!wifi.isConnectedTo(ssid) && autotrigger_active) {
                 garagePing.disableAutotriggerPing(true);
             } else if (wifi.isConnectedTo(ssid) && autotrigger_active) {
@@ -132,7 +150,7 @@ public class GarageService extends Service {
 
                     @Override
                     public void onPingFail(int count) {
-                        callbacks.logMessage("Failed " + count + " pings");
+                        callbacks.logMessage("Failed " + count + " pings" + "\n");
                     }
 
                     @Override
@@ -225,7 +243,7 @@ public class GarageService extends Service {
 
                         @Override
                         public void onPingFail(int count) {
-                            callbacks.logMessage("Failed " + count + " pings");
+                            callbacks.logMessage("Failed " + count + " pings" + "\n");
                         }
 
                         @Override
