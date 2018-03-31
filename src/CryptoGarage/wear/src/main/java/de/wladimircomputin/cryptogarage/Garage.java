@@ -54,15 +54,6 @@ public class Garage extends WearableActivity implements GarageServiceCallbacks{
 
         triggerButton = findViewById(R.id.triggerButton);
         triggerProgress = findViewById(R.id.triggerButton_Progress);
-        //final ScrollView sc = (ScrollView) findViewById(R.id.sc);
-//        logTextView.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void afterTextChanged(Editable s) {sc.fullScroll(ScrollView.FOCUS_DOWN);}
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-//        });
 
         sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         vib = (Vibrator) getSystemService(VIBRATOR_SERVICE);

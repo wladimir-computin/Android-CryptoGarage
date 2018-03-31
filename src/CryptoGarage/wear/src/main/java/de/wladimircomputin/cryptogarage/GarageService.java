@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
 
@@ -52,7 +53,7 @@ public class GarageService extends Service {
     public void init_wifi(BroadcastReceiver receiver, boolean aggressiveConnect){
         wifi.setWifiEnabled(true);
         try {
-            this.registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+            this.registerReceiver(receiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
         } catch (Exception x){}
         if(!wifi.isConnectedTo(ssid)) {
             wifi.connectToSSID(ssid, pass);

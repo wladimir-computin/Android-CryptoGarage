@@ -14,10 +14,12 @@ android {
         targetSdkVersion 27
         versionCode 4
         versionName '3.1'
+        resConfigs "en", "de"
     }
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -27,11 +29,11 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:wear:27.1.0'
-    compile 'com.google.android.support:wearable:2.2.0'
-    provided 'com.google.android.wearable:wearable:2.2.0'
-    compile 'com.android.support:design:27.1.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:wear:27.1.0'
+    implementation 'com.google.android.support:wearable:2.3.0'
+    compileOnly 'com.google.android.wearable:wearable:2.3.0'
+    implementation 'com.android.support:design:27.1.0'
     implementation 'com.android.support:gridlayout-v7:27.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation project(':libcryptogarage')
