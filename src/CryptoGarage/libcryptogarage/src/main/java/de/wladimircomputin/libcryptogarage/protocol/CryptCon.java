@@ -19,7 +19,7 @@ public class CryptCon {
     private TCPCon_async tcpCon_async;
 
     public CryptCon(String pass, Context context){
-        this.crypt = new Crypter(pass);
+        this.crypt = Crypter.init(pass, context);
         this.context = context;
         tcpCon_async = new TCPCon_async(context.getString(R.string.static_ip), 4646, context);
     }

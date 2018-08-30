@@ -1,12 +1,17 @@
 package de.wladimircomputin.libcryptogarage.protocol;
 
+import android.content.Context;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import de.wladimircomputin.libcryptogarage.R;
 
 /**
  * Created by spamd on 08.03.2017.
@@ -17,13 +22,25 @@ public class Crypter {
     private Cipher aes;
     private SecureRandom random;
 
-    public Crypter(String devicePass){
-        byte[] key = devicePass.getBytes(StandardCharsets.UTF_8);
+    private static Crypter instance;
+
+    public static Crypter init(String devicePass, Context context){
+        if(instance == null){
+            instance = new Crypter(devicePass, context);
+        }
+        return instance;
+    }
+
+    private Crypter(String devicePass, Context context){
+        byte[] key = (devicePass + context.getResources().getString(R.string.key_salt)).getBytes(StandardCharsets.UTF_8);
         this.random = new SecureRandom();
         try {
-            MessageDigest sha = MessageDigest.getInstance("SHA-256");
-            key = sha.digest(key);
-            this.secretKeySpec = new SecretKeySpec(key, "AES");
+            MessageDigest sha = MessageDigest.getInstance("SHA-512");
+            int count = context.getResources().getInteger(R.integer.sha_rounds) + 1;
+            for(int i = 0; i < count; i++){
+                key = sha.digest(key);
+            }
+            this.secretKeySpec = new SecretKeySpec(Arrays.copyOf(key, 32), "AES");
             this.aes = Cipher.getInstance("AES/GCM/NoPadding");
         } catch (Exception x){
             x.printStackTrace();

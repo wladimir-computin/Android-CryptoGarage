@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '28.0.2'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -12,8 +12,8 @@ android {
         applicationId "de.wladimircomputin.cryptogarage"
         minSdkVersion 24
         targetSdkVersion 27
-        versionCode 4
-        versionName '3.1'
+        versionCode 5
+        versionName '4.0'
         resConfigs "en", "de"
     }
     buildTypes {
@@ -35,6 +35,6 @@ dependencies {
     compileOnly 'com.google.android.wearable:wearable:2.3.0'
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support:gridlayout-v7:27.1.1'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation project(':libcryptogarage')
 }

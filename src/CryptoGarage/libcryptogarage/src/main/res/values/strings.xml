@@ -18,5 +18,6 @@
     <string name="command_reset" translatable="false">reset</string>
     <string name="command_status" translatable="false">getStatus</string>
     <string name="command_update" translatable="false">update</string>
+    <string name="key_salt" translatable="false">FTh.!%B$</string>
     <string name="static_ip" translatable="false">192.168.4.1</string>
 </resources>
