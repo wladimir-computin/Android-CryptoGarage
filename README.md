@@ -19,6 +19,20 @@ Instead of sending an encrypted random Challenge_IV to the client, we could also
 #### Attacking the ClientHello message ####
 This message has always the same payload and is encrypted using the same password. That's no problem since AES256-GCM with random IVs is used. However, this packet can be eavesdropped and is an ideal candidate for offline brute-forcing in order to break the password. I did some calculations to determine the required time for an successful attack in dependence of the password length.
 
+Assuming a **8x GTX1080** setup with **Hashcat 3.00*** (see https://gist.github.com/epixoip/a83d38f412b4737e99bbef804a270c40) and that AES-GCM is incredibly fast so **only the SHA512 password hashing** is relevant.
+
+hashrate (SHA512, 1 round): 8624.7 MH/s
+hashrate (SHA512, 5000 rounds, approx.): 1.725 MH/s
+
+#### Time to bruteforce the whole key space: ####
+| Password length | 8 | 10 | 12 | 14
+|--|--:|--:|--:|--:|
+| **lowercase (26)** | 1.4 days | 2.6 years | 1 754 years | 1 185 853 years |
+| **lower + upper (52)** | 358.7 days | 2 657 years | 7 185 291 years | very long |
+| **alphanumeric (62)**| 4 years | 15 428 years | very long | ridiculously long |
+
+Since you set the device password only once and never have to type it again, just use a proper password length depending on how paranoid you are.
+
 #### Guessing the Command message ####
 The server has an internal state machine which decides the types of packets the server accepts. Therefore, an attacker has only one guess and only two seconds time for forging the "Command" message. Then the Challenge_IV becomes invalid and the server switches back to its initial state waiting for a ClientHello. All messages are authenticated with an AES-GCM authentication tag, so altering packets from a man-in-the-middle position without knowing the correct password (and IV) is not possible.
 
