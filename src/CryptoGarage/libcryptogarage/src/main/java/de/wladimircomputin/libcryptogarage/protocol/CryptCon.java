@@ -57,7 +57,7 @@ public class CryptCon {
 
             @Override
             public void onError(String reason) {
-                if(reason != "") {
+                if(!reason.isEmpty()) {
                     receiver.onProgress("Error: " + reason + "\n\n", 75);
                 } else {
                     receiver.onProgress("Connection failed!\n\n", 75);
@@ -106,7 +106,7 @@ public class CryptCon {
 
             @Override
             public void onError(String reason) {
-                if(reason != "") {
+                if(!reason.isEmpty()) {
                     receiver.onProgress("Error: " + reason + "\n\n", 75);
                 } else {
                     receiver.onProgress("Command not accepted!\n\n", 75);

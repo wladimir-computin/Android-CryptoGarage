@@ -1,6 +1,7 @@
 package de.wladimircomputin.cryptogarage;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -14,6 +15,10 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import java.io.File;
+
+import de.wladimircomputin.cryptogarage.util.Updater;
+import de.wladimircomputin.libcryptogarage.net.TCPConReceiver;
 import de.wladimircomputin.libcryptogarage.protocol.CryptCon;
 import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
 
@@ -118,10 +123,67 @@ public class SettingsActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     Toast.makeText(SettingsActivity.this, "Update server enabled on\n" + response, Toast.LENGTH_LONG).show();
                 });
+
+                File update = new File(getExternalFilesDir(null), "CryptoGarage.bin");
+
+                if(update.exists()) {
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+
+                    builder.setTitle("Firmware Update");
+                    builder.setMessage("Found binary firmware file \"CryptoGarage.bin\". \n Upload?");
+
+                    builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int which) {
+                            runOnUiThread(() -> {
+                                Toast.makeText(SettingsActivity.this, "Uploading new firmware...", Toast.LENGTH_LONG).show();
+                            });
+                            Updater updater = new Updater(response, update);
+
+                            updater.startUpdate(new TCPConReceiver() {
+                                @Override
+                                public void onResponseReceived(String responseData) {
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(SettingsActivity.this, responseData, Toast.LENGTH_LONG).show();
+                                    });
+                                }
+
+                                @Override
+                                public void onError(String reason) {
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(SettingsActivity.this, "Error: " + reason, Toast.LENGTH_LONG).show();
+                                    });
+                                }
+                            });
+
+                            dialog.dismiss();
+                        }
+                    });
+
+                    builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            // Do nothing
+                            dialog.dismiss();
+                        }
+                    });
+
+                    runOnUiThread(() -> {
+                        AlertDialog alert = builder.create();
+                        alert.show();
+                    });
+                }
             }
 
             @Override
-            public void onFail() {}
+            public void onFail() {
+                runOnUiThread(() -> {
+                    Toast.makeText(SettingsActivity.this, "Error: " + "Failed to enable update server!", Toast.LENGTH_LONG).show();
+                });
+            }
 
             @Override
             public void onFinished() {}
@@ -246,7 +308,9 @@ public class SettingsActivity extends AppCompatActivity {
                 final String saved = sharedPref.getString(getString(prefKey), getString(def));
                 final String new_ = editText.getText().toString();
                 if (!new_.equals(saved)) {
-                    progressBar.setVisibility(View.VISIBLE);
+                    runOnUiThread(() -> {
+                        progressBar.setVisibility(View.VISIBLE);
+                    });
                     cc.sendMessageEncrypted(getString(command) + new_, new CryptConReceiver() {
                         @Override
                         public void onSuccess(String response) {
@@ -274,8 +338,7 @@ public class SettingsActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onProgress(String sprogress, int iprogress) {
-                        }
+                        public void onProgress(String sprogress, int iprogress) {}
                     });
                 } else {
                     if (next != null) {

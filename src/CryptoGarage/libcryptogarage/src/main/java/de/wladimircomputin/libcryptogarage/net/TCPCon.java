@@ -22,11 +22,13 @@ public class TCPCon {
 
     private String ip = "";
     private int port;
-    private Context context;
 
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
+
+    private final String BEGIN;
+    private final String END;
 
     public static TCPCon instance(String url, int port, Context context){
         if(instance == null){
@@ -38,7 +40,8 @@ public class TCPCon {
     private TCPCon(String ip, int port, Context context) {
         this.ip = ip;
         this.port = port;
-        this.context = context;
+        this.BEGIN = context.getString(R.string.message_begin);
+        this.END = context.getString(R.string.message_end);
     }
 
     public String sendMessage(String message){
@@ -48,10 +51,9 @@ public class TCPCon {
                 out.flush();
                 StringBuilder sb = new StringBuilder();
                 String line;
-                String end = context.getString(R.string.message_end);
                 while ((line = in.readLine()) != null) {
                     sb.append(line).append("\n");
-                    if(line.contains(end))
+                    if(line.contains(END))
                         break;
                 }
                 return unpackMessage(sb.toString());
@@ -85,16 +87,16 @@ public class TCPCon {
     }
 
     private String packMessage(String in){
-        return context.getString(R.string.message_begin) + in + context.getString(R.string.message_end);
+        return BEGIN + in + END;
     }
 
     private String unpackMessage(String in){
         String msg = "";
-        int startIndex = in.indexOf(context.getString(R.string.message_begin));
-        int endIndex = in.indexOf(context.getString(R.string.message_end), startIndex);
+        int startIndex = in.indexOf(BEGIN);
+        int endIndex = in.indexOf(END, startIndex);
 
-        if ((startIndex != -1) && (endIndex != -1) && (endIndex - startIndex <= 200)){
-            msg = in.substring(startIndex + context.getString(R.string.message_begin).length(), endIndex);
+        if ((startIndex != -1) && (endIndex != -1) && (endIndex - startIndex <= 300)){
+            msg = in.substring(startIndex + BEGIN.length(), endIndex);
         }
         return msg;
     }

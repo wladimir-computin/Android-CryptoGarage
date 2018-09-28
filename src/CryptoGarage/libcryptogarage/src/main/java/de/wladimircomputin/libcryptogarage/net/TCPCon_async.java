@@ -1,6 +1,7 @@
 package de.wladimircomputin.libcryptogarage.net;
 
 import android.content.Context;
+import android.util.Log;
 
 import de.wladimircomputin.libcryptogarage.R;
 

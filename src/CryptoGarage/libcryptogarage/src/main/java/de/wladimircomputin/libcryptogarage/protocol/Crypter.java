@@ -23,9 +23,12 @@ public class Crypter {
     private SecureRandom random;
 
     private static Crypter instance;
+    private String devicePass;
 
     public static Crypter init(String devicePass, Context context){
         if(instance == null){
+            instance = new Crypter(devicePass, context);
+        } else if (!instance.devicePass.equals(devicePass)){
             instance = new Crypter(devicePass, context);
         }
         return instance;
@@ -42,6 +45,7 @@ public class Crypter {
             }
             this.secretKeySpec = new SecretKeySpec(Arrays.copyOf(key, 32), "AES");
             this.aes = Cipher.getInstance("AES/GCM/NoPadding");
+            this.devicePass = devicePass;
         } catch (Exception x){
             x.printStackTrace();
         }

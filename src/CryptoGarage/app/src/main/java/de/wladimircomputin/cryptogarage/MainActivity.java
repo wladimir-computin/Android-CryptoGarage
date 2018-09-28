@@ -31,6 +31,7 @@ import android.widget.TextView;
 
 import de.wladimircomputin.cryptogarage.util.WiFi;
 import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
+import de.wladimircomputin.libcryptogarage.protocol.Crypter;
 
 public class MainActivity extends AppCompatActivity implements GarageServiceCallbacks{
 
@@ -108,7 +109,12 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         //    unbindService(mConnection);
         //    garageBound = false;
         //}
+        //stopService(new Intent(this, GarageService.class));
+    }
 
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
         stopService(new Intent(this, GarageService.class));
     }
 
@@ -139,6 +145,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
             case R.id.menu_app_restart:
                     Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName() );
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    stopService(new Intent(this, GarageService.class));
                     finish();
                     startActivity(i);
                 break;
