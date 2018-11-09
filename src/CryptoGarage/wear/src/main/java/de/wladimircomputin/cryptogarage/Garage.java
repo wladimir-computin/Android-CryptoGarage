@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import de.wladimircomputin.cryptogarage.util.Awake;
 import de.wladimircomputin.cryptogarage.util.WiFi;
+import de.wladimircomputin.libcryptogarage.protocol.Content;
 import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
 
 public class Garage extends WearableActivity implements GarageServiceCallbacks{
@@ -40,7 +41,7 @@ public class Garage extends WearableActivity implements GarageServiceCallbacks{
     ConnectivityManager connMgr;
 
 
-
+    String ip;
     String devPass;
     String ssid;
     String pass;
@@ -61,6 +62,7 @@ public class Garage extends WearableActivity implements GarageServiceCallbacks{
 
         //cc = new CryptCon(sharedPref.getString(getString(R.string.preference_devpass_key), getString(R.string.preference_devpass_default)), this);
 
+        ip = sharedPref.getString(getString(R.string.preference_ip_key), getString(R.string.preference_ip_default));
         devPass = sharedPref.getString(getString(R.string.preference_devpass_key), getString(R.string.preference_devpass_default));
         ssid = sharedPref.getString(getString(R.string.preference_wlanssid_key), getString(R.string.preference_wlanssid_default));
         pass = sharedPref.getString(getString(R.string.preference_wlanpass_key), getString(R.string.preference_wlanpass_default));
@@ -70,6 +72,7 @@ public class Garage extends WearableActivity implements GarageServiceCallbacks{
 
 
         if (savedInstanceState != null) {
+            ip = savedInstanceState.getString("ip");
             devPass = savedInstanceState.getString("devPass");
             ssid = savedInstanceState.getString("ssid");
             pass = savedInstanceState.getString("pass");
@@ -101,6 +104,7 @@ public class Garage extends WearableActivity implements GarageServiceCallbacks{
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        outState.putString("ip", ip);
         outState.putString("devPass", devPass);
         outState.putString("ssid", ssid);
         outState.putString("pass", pass);
@@ -121,7 +125,7 @@ public class Garage extends WearableActivity implements GarageServiceCallbacks{
     public void trigger(){
         garage.trigger(new CryptConReceiver() {
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(Content response) {
 
             }
 
@@ -159,7 +163,7 @@ public class Garage extends WearableActivity implements GarageServiceCallbacks{
         garage.reboot(new CryptConReceiver() {
 
             @Override
-            public void onSuccess(String response) {}
+            public void onSuccess(Content response) {}
 
             @Override
             public void onFail() {}
@@ -223,7 +227,7 @@ public class Garage extends WearableActivity implements GarageServiceCallbacks{
             GarageService.LocalBinder binder = (GarageService.LocalBinder) service;
             garage = binder.getService();
             garageBound = true;
-            garage.init(devPass, ssid, pass, Garage.this);
+            garage.init(ip, devPass, ssid, pass, Garage.this);
             garage.init_wifi(garage.wifi_init_receiver,false);
             //("wtf", "test");
         }

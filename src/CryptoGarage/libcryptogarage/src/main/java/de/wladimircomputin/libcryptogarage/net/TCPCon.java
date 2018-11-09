@@ -16,19 +16,13 @@ import de.wladimircomputin.libcryptogarage.R;
  * Created by spamd on 07.01.2018.
  */
 
-public class TCPCon {
+public class TCPCon extends NetCon{
 
     private static TCPCon instance;
-
-    private String ip = "";
-    private int port;
 
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-
-    private final String BEGIN;
-    private final String END;
 
     public static TCPCon instance(String url, int port, Context context){
         if(instance == null){
@@ -37,38 +31,45 @@ public class TCPCon {
         return instance;
     }
 
-    private TCPCon(String ip, int port, Context context) {
-        this.ip = ip;
-        this.port = port;
-        this.BEGIN = context.getString(R.string.message_begin);
-        this.END = context.getString(R.string.message_end);
+    public TCPCon(String ip, int port, Context context) {
+        super(ip, port, context);
     }
 
-    public String sendMessage(String message){
-        try {
-            if(connect(ip,port)) {
-                out.println(packMessage(message));
-                out.flush();
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = in.readLine()) != null) {
-                    sb.append(line).append("\n");
-                    if(line.contains(END))
-                        break;
+    public String sendMessage(String message) {
+        for (int failcount = 0; failcount < 4; failcount++){
+            try {
+                if (connect(ip, port)) {
+                    out.println(packMessage(message));
+                    out.flush();
+                    /*StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        sb.append(line).append("\n");
+                        if (line.contains(END))
+                            break;
+                    }
+                    */
+                    String sb = in.readLine();
+                    if(sb == null)
+                        sb = "";
+                    return unpackMessage(sb.toString());
                 }
-                return unpackMessage(sb.toString());
+            } catch (Exception x) {
+                x.printStackTrace();
             }
-        } catch (Exception x){
-            x.printStackTrace();
+            try {
+                Thread.sleep(250);
+            } catch (Exception x){}
         }
-        return "FAIL: No Connection";
+        close();
+        return ERROR_HEADER + "No Connection";
     }
 
     public boolean connect(String ip, int port) throws IOException{
         if(socket == null || !socket.isConnected()) {
             socket = new Socket();
             socket.connect(new InetSocketAddress(ip, port), 500);
-            //socket.setTcpNoDelay(true);
+            socket.setTcpNoDelay(true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
         }
@@ -86,18 +87,5 @@ public class TCPCon {
         socket = null;
     }
 
-    private String packMessage(String in){
-        return BEGIN + in + END;
-    }
 
-    private String unpackMessage(String in){
-        String msg = "";
-        int startIndex = in.indexOf(BEGIN);
-        int endIndex = in.indexOf(END, startIndex);
-
-        if ((startIndex != -1) && (endIndex != -1) && (endIndex - startIndex <= 300)){
-            msg = in.substring(startIndex + BEGIN.length(), endIndex);
-        }
-        return msg;
-    }
 }

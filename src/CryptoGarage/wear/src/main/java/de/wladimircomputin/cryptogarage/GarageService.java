@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.IBinder;
 
 import de.wladimircomputin.cryptogarage.util.WiFi;
+import de.wladimircomputin.libcryptogarage.protocol.Content;
 import de.wladimircomputin.libcryptogarage.protocol.CryptCon;
 import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
 
@@ -18,6 +19,7 @@ public class GarageService extends Service {
     private final IBinder binder = new LocalBinder();
     private CryptCon cc;
     private WiFi wifi;
+    private String ip;
     private String devPass;
     private String ssid;
     private String pass;
@@ -37,13 +39,14 @@ public class GarageService extends Service {
     }
 
     /** method for clients */
-    public void init(String devPass, String ssid, String pass, GarageServiceCallbacks callbacks) {
+    public void init(String ip, String devPass, String ssid, String pass, GarageServiceCallbacks callbacks) {
+        this.ip = ip;
         this.devPass = devPass;
         this.ssid = ssid;
         this.pass = pass;
         this.callbacks = callbacks;
         wifi = new WiFi(this.getApplicationContext());
-        cc = new CryptCon(devPass, this);
+        cc = new CryptCon(ip, devPass, this);
     }
 
     public void setCallbacks(GarageServiceCallbacks callbacks) {
@@ -83,7 +86,7 @@ public class GarageService extends Service {
         if(wifi.isConnectedTo(ssid)){
             cc.sendMessageEncrypted(getString(R.string.command_trigger), new CryptConReceiver() {
                 @Override
-                public void onSuccess(String response) {
+                public void onSuccess(Content response) {
                     c.onSuccess(response);
                 }
 
@@ -110,7 +113,7 @@ public class GarageService extends Service {
     public void reboot(final CryptConReceiver c){
         cc.sendMessageEncrypted(getString(R.string.command_reboot), new CryptConReceiver() {
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(Content response) {
                 c.onSuccess(response);
             }
 

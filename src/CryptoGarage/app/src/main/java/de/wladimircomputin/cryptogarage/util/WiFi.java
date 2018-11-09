@@ -11,6 +11,8 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 
+import de.wladimircomputin.libcryptogarage.net.TCPCon;
+
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.content.Context.WIFI_SERVICE;
 
@@ -19,6 +21,8 @@ import static android.content.Context.WIFI_SERVICE;
  */
 
 public class WiFi {
+    private static WiFi instance;
+
     private WifiManager wifiManager;
     private ConnectivityManager connMgr;
     private Handler connectHandler;
@@ -26,12 +30,19 @@ public class WiFi {
     private boolean isAggressiveConnect;
     private int netId = -1;
 
-    public WiFi(Context context){
+    private WiFi(Context context){
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(WIFI_SERVICE);
         this.connMgr = (ConnectivityManager) context.getApplicationContext().getSystemService(CONNECTIVITY_SERVICE);;
         connectHandler = new Handler();
         awake = new Awake(context);
         bindOnNetwork();
+    }
+
+    public static WiFi instance(Context context){
+        if(instance == null){
+            instance = new WiFi(context);
+        }
+        return instance;
     }
 
     public boolean isWifiEnabled(){

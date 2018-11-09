@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
@@ -84,5 +85,11 @@ public class Crypter {
         byte[] iv = new byte[12];
         random.nextBytes(iv);
         return iv;
+    }
+
+    public byte[] getRandomChallenge(){
+        byte[] challenge = new byte[12];
+        random.nextBytes(challenge);
+        return challenge;
     }
 }

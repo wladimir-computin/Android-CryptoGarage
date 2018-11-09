@@ -30,6 +30,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import de.wladimircomputin.cryptogarage.util.WiFi;
+import de.wladimircomputin.libcryptogarage.protocol.Content;
 import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
 import de.wladimircomputin.libcryptogarage.protocol.Crypter;
 
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     WiFi wifi;
     SharedPreferences sharedPref;
 
+    String ip;
     String devPass;
     String ssid;
     String pass;
@@ -77,14 +79,16 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         //cc = new CryptCon(sharedPref.getString(getString(R.string.preference_devpass_key), getString(R.string.preference_devpass_default)), this);
 
+        ip = sharedPref.getString(getString(R.string.preference_ip_key), getString(R.string.preference_ip_default));
         devPass = sharedPref.getString(getString(R.string.preference_devpass_key), getString(R.string.preference_devpass_default));
         ssid = sharedPref.getString(getString(R.string.preference_wlanssid_key), getString(R.string.preference_wlanssid_default));
         pass = sharedPref.getString(getString(R.string.preference_wlanpass_key), getString(R.string.preference_wlanpass_default));
         autotrigger_timeout = Integer.valueOf(sharedPref.getString(getString(R.string.preference_autotrigger_timeout_key), getString(R.string.preference_autotrigger_timeout_default)));
 
-        wifi = new WiFi(this.getApplicationContext());
+        wifi = WiFi.instance(this.getApplicationContext());
 
         if (savedInstanceState != null) {
+            ip = savedInstanceState.getString("ip");
             devPass = savedInstanceState.getString("devPass");
             ssid = savedInstanceState.getString("ssid");
             pass = savedInstanceState.getString("pass");
@@ -120,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        outState.putString("ip", ip);
         outState.putString("devPass", devPass);
         outState.putString("ssid", ssid);
         outState.putString("pass", pass);
@@ -200,9 +205,9 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     }
 
     public void trigger(){
-        garage.trigger(new CryptConReceiver() {
+        garage.failsafe_trigger(new CryptConReceiver() {
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(Content response) {
                 setProgressIndeterminate(false);
             }
 
@@ -232,13 +237,13 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
                     setProgressAnimate(triggerProgress, iprogress);
                 });
             }
-        });
+        }, 0);
     }
 
     public void autotrigger(){
         garage.autotrigger( new CryptConReceiver() {
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(Content response) {
             }
 
             @Override
@@ -275,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         garage.reboot(new CryptConReceiver() {
 
             @Override
-            public void onSuccess(String response) {}
+            public void onSuccess(Content response) {}
 
             @Override
             public void onFail() {}
@@ -414,7 +419,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
             GarageService.LocalBinder binder = (GarageService.LocalBinder) service;
             garage = binder.getService();
             garageBound = true;
-            garage.init(devPass, ssid, pass, autotrigger_timeout, MainActivity.this);
+            garage.init(sharedPref, MainActivity.this);
             garage.init_wifi(garage.wifi_init_receiver,false);
             if(garage.isAutotrigger_active()){
                 setProgressIndeterminate(true);

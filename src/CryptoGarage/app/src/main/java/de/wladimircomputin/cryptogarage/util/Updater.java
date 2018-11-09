@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import de.wladimircomputin.libcryptogarage.net.TCPConReceiver;
+import de.wladimircomputin.libcryptogarage.net.ConReceiver;
 
 
 public class Updater {
@@ -18,7 +18,7 @@ public class Updater {
         this.url = url;
     }
 
-    public void startUpdate(final TCPConReceiver callback){
+    public void startUpdate(final ConReceiver callback){
         new Thread(() -> {
             final String out = startUpdate();
             if (out.contains("Error") || out.isEmpty()) {

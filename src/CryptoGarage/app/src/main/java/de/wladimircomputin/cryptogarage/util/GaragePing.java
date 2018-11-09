@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 
 import de.wladimircomputin.cryptogarage.R;
+import de.wladimircomputin.libcryptogarage.protocol.Content;
 import de.wladimircomputin.libcryptogarage.protocol.CryptCon;
 import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
 
@@ -21,10 +22,10 @@ public class GaragePing {
     private GaragePingReceiver callback;
     private boolean running = false;
 
-    public GaragePing(int maxFails, String devPass, Context context){
+    public GaragePing(int maxFails, CryptCon cc, Context context){
         this.maxFails = maxFails;
         this.context = context;
-        cc = new CryptCon(devPass, context);
+        this.cc = cc;
         pingHandler = new Handler();
         awake = new Awake(context);
     }
@@ -56,9 +57,9 @@ public class GaragePing {
         @Override
         public void run() {
             final Runnable me = this;
-            cc.sendMessageEncrypted(context.getString(R.string.command_ping), new CryptConReceiver() {
+            cc.sendMessageEncrypted(context.getString(R.string.command_ping), CryptCon.Mode.UDP, new CryptConReceiver() {
                 @Override
-                public void onSuccess(String response) {
+                public void onSuccess(Content response) {
                     pingFails = 0;
                     callback.onPingSuccess();
                 }
