@@ -180,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     }
 
     public void trigger_click(View view) {
+        garage.autotriggerStopSearch();
         garage.init_wifi(garage.wifi_init_receiver,false);
         trigger();
     }
@@ -421,9 +422,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
             garageBound = true;
             garage.init(sharedPref, MainActivity.this);
             garage.init_wifi(garage.wifi_init_receiver,false);
-            if(garage.isAutotrigger_active()){
-                setProgressIndeterminate(true);
-            }
+            setProgressIndeterminate(garage.isAutotrigger_active() || garage.isAutotrigger_searching());
         }
 
         @Override

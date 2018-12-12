@@ -15,7 +15,7 @@ public class Message {
     public String challenge_request_b64;
     public String challenge_response_b64;
     public String data_b64;
-    public String flags;
+    public String flags = "";
 
     public byte[] iv;
     public byte[] tag;
@@ -71,7 +71,7 @@ public class Message {
     public Message encrypt(Crypter crypter){
         this.iv = crypter.getRandomIV();
 
-        String message_b64 = challenge_response_b64 + ":" + challenge_request_b64 + ":" + data_b64;
+        String message_b64 = flags + ":" + challenge_response_b64 + ":" + challenge_request_b64 + ":" + data_b64;
 
         byte[] encryptedMessageWithTag = crypter.encrypt(message_b64.getBytes(StandardCharsets.UTF_8), iv);
 
