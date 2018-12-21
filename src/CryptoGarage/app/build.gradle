@@ -16,8 +16,8 @@ android {
         applicationId "de.wladimircomputin.cryptogarage"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 6
-        versionName "5.0"
+        versionCode 7
+        versionName "5.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         resConfigs "en", "de"
