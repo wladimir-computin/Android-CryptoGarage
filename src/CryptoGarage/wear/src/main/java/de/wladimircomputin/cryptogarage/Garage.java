@@ -206,7 +206,8 @@ public class Garage extends WearableActivity implements GarageServiceCallbacks{
 
     @Override
     public void logMessage(String message) {
-        logTextView.append(message + "\n");
+        if(logTextView != null)
+            logTextView.append(message + "\n");
     }
 
     @Override

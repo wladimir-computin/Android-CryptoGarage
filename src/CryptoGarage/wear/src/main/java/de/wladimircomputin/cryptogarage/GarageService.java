@@ -8,7 +8,9 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 
 import de.wladimircomputin.cryptogarage.util.WiFi;
 import de.wladimircomputin.libcryptogarage.protocol.Content;
@@ -106,8 +108,48 @@ public class GarageService extends Service {
                 }
             });
         } else {
-
+            wifi.aggressiveConnect(ssid);
+            c.onFail();
         }
+    }
+
+    private int failcount = 0;
+    private final int failcount_limit = 3;
+    private Handler later = new Handler();
+
+    public void failsafe_trigger(CryptConReceiver c, long delay){
+        later.postDelayed(() -> {
+            trigger(new CryptConReceiver() {
+                @Override
+                public void onSuccess(Content response) {
+                    failcount = 0;
+                    c.onSuccess(response);
+                    c.onFinished();
+                }
+
+                @Override
+                public void onFail() {
+                    if(failcount < failcount_limit){
+                        callbacks.logMessage("Trying again...");
+                        Looper.prepare();
+                        failcount++;
+                        failsafe_trigger(this, 250);
+                    } else {
+                        later.postDelayed(()->failcount = 0, delay * 2);
+                        c.onFail();
+                        c.onFinished();
+                    }
+                }
+
+                @Override
+                public void onFinished() {}
+
+                @Override
+                public void onProgress(String sprogress, int iprogress) {
+                    c.onProgress(sprogress, iprogress);
+                }
+            });
+        }, delay);
     }
 
     public void reboot(final CryptConReceiver c){

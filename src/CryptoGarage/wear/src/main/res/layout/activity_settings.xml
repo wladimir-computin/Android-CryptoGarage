@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.wear.widget.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="10dp">
+    android:layout_margin="15dp">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
@@ -15,14 +16,14 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintGuide_begin="20dp"
-            app:layout_constraintGuide_percent="0.15" />
+            app:layout_constraintGuide_percent="0.2" />
 
         <android.support.constraint.Guideline
             android:id="@+id/div"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.4" />
+            app:layout_constraintGuide_percent="0.45" />
 
         <TextView
             android:id="@+id/settings_devpass_label"
@@ -36,7 +37,7 @@
             android:textSize="12sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/settings_devpass_text"
-            app:layout_constraintRight_toRightOf="@+id/div"
+            app:layout_constraintRight_toLeftOf="@id/div"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/settings_devpass_text"
             app:layout_gravity="left|center_vertical" />
@@ -51,7 +52,8 @@
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:textSize="12sp"
-            app:layout_constraintLeft_toRightOf="@+id/div"
+            app:layout_constraintLeft_toRightOf="@id/div"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mid"
             app:layout_gravity="left|center_vertical" />
 
@@ -67,7 +69,7 @@
             android:textSize="12sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/settings_wlanssid_text"
-            app:layout_constraintRight_toRightOf="@+id/div"
+            app:layout_constraintRight_toLeftOf="@+id/div"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/settings_wlanssid_text"
             app:layout_gravity="left|center_vertical" />
@@ -81,7 +83,8 @@
             android:inputType="text"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:textSize="12sp"
-            app:layout_constraintLeft_toRightOf="@+id/div"
+            app:layout_constraintLeft_toRightOf="@id/div"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/settings_devpass_text" />
 
         <TextView
@@ -96,7 +99,7 @@
             android:textSize="12sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/settings_wlanpass_text"
-            app:layout_constraintRight_toRightOf="@+id/div"
+            app:layout_constraintRight_toLeftOf="@+id/div"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/settings_wlanpass_text"
             app:layout_gravity="left|center_vertical" />
@@ -111,6 +114,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:textSize="12sp"
             app:layout_constraintLeft_toRightOf="@+id/div"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/settings_wlanssid_text" />
 
         <Button
@@ -121,8 +125,8 @@
             android:text="Save"
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_gravity="bottom|center" />
 
     </android.support.constraint.ConstraintLayout>
