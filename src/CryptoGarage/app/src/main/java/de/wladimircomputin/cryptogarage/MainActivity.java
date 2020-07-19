@@ -1,15 +1,22 @@
 package de.wladimircomputin.cryptogarage;
 
+import android.Manifest;
 import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -25,10 +32,15 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.security.acl.Permission;
+
+import de.wladimircomputin.cryptogarage.util.GateState;
 import de.wladimircomputin.cryptogarage.util.WiFi;
 import de.wladimircomputin.libcryptogarage.protocol.Content;
 import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
@@ -40,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     boolean garageBound;
 
     Button triggerButton;
+    ImageView statusImageView;
     Button autotriggerButton;
     TextView logTextView;
     ProgressBar triggerProgress;
@@ -62,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         setContentView(R.layout.activity_main);
         logTextView = findViewById(R.id.logTextView);
         triggerButton = findViewById(R.id.triggerButton);
+        statusImageView = findViewById(R.id.statusImageView);
         autotriggerButton = findViewById(R.id.autotriggerButton);
         triggerProgress = findViewById(R.id.triggerButton_progress);
         autotriggerProgress = findViewById(R.id.autotriggerButton_progress);
@@ -98,12 +112,14 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         Intent intent = new Intent(this, GarageService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 2);
+        }
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-
     }
 
     @Override
@@ -160,6 +176,10 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
                     startActivity(intent);
                 break;
 
+            case R.id.menu_status:
+                getStatus();
+                break;
+
             case R.id.menu_about:
                     String version = BuildConfig.VERSION_NAME;
                     String about =  getString(R.string.about_author) + "\n\n" +
@@ -201,7 +221,6 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     }
 
     public void menu_reboot_click(){
-        garage.init_wifi(garage.wifi_init_receiver,false);
         reboot();
     }
 
@@ -229,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
             @Override
             public void onFinished() {
                 setProgress("trigger", -1);
+                updateGateState(null);
             }
 
             @Override
@@ -265,6 +285,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
             public void onFinished() {
                 setProgress("autotrigger", -1);
                 setProgressIndeterminate(garage.isAutotrigger_active());
+                updateGateState(null);
             }
 
             @Override
@@ -285,6 +306,65 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
 
             @Override
             public void onFail() {}
+
+            @Override
+            public void onFinished() {}
+
+            @Override
+            public void onProgress(String sprogress, int iprogress) {
+                runOnUiThread(() -> {
+                    logTextView.append(sprogress);
+                });
+            }
+        });
+    }
+
+    public void updateGateState(View view){
+        garage.getGateState(new CryptConReceiver() {
+            @Override
+            public void onSuccess(Content response) {
+                runOnUiThread(() -> {
+                    GateState gateState = GateState.valueOf(response.data);
+                    statusImageView.setImageDrawable(getDrawable(gateState.getIcon()));
+                });
+            }
+
+            @Override
+            public void onFail() {
+
+            }
+
+            @Override
+            public void onFinished() {
+
+            }
+
+            @Override
+            public void onProgress(String sprogress, int iprogress) {
+
+            }
+        });
+    }
+
+    public void getStatus(){
+        garage.getStatus(new CryptConReceiver() {
+            @Override
+            public void onSuccess(Content response) {
+                runOnUiThread(() -> {
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+                    builder1.setMessage(response.data);
+                    builder1.setCancelable(true);
+                    builder1.setTitle("Status");
+                    builder1.show();
+                });
+            }
+
+            @Override
+            public void onFail() {
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
+                });
+            }
 
             @Override
             public void onFinished() {}
@@ -400,7 +480,9 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         runOnUiThread(() -> {
             triggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
             autotriggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
+            statusImageView.setImageDrawable(getDrawable(GateState.GATE_NONE.getIcon()));
         });
+        updateGateState(null);
     }
 
     @Override

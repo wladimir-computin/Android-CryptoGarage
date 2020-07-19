@@ -1,5 +1,7 @@
 package de.wladimircomputin.cryptogarage.util;
 
+import android.util.Log;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +26,7 @@ public class Updater {
             if (out.contains("Error") || out.isEmpty()) {
                 callback.onError(out);
             } else {
-                callback.onResponseReceived("Update successful, rebooting!");
+                callback.onResponseReceived(out);
             }
         }).start();
     }
@@ -43,9 +45,11 @@ public class Updater {
         String send(String path, File file) {
             String out = "";
             try {
-                HttpURLConnection httpUrlConnection = null;
+                if(!path.startsWith("http://")){
+                    path = "http://" + path;
+                }
                 URL url = new URL(path);
-                httpUrlConnection = (HttpURLConnection) url.openConnection();
+                HttpURLConnection httpUrlConnection = (HttpURLConnection) url.openConnection();
                 httpUrlConnection.setUseCaches(false);
                 httpUrlConnection.setDoOutput(true);
 
@@ -56,9 +60,7 @@ public class Updater {
                 DataOutputStream request = new DataOutputStream(httpUrlConnection.getOutputStream());
 
                 request.writeBytes(this.twoHyphens + this.boundary + this.crlf);
-                request.writeBytes("Content-Disposition: form-data; name=\"" +
-                        "update" + "\";filename=\"" +
-                        file.getName() + "\"" + this.crlf);
+                request.writeBytes("Content-Disposition: form-data; name=\"firmware\";" + " filename=\"" + file.getName() + "\"" + this.crlf);
                 request.writeBytes(this.crlf);
 
                 byte[] bytesArray = new byte[(int) file.length()];
@@ -70,8 +72,7 @@ public class Updater {
                 request.write(bytesArray);
 
                 request.writeBytes(this.crlf);
-                request.writeBytes(this.twoHyphens + this.boundary +
-                        this.twoHyphens + this.crlf);
+                request.writeBytes(this.twoHyphens + this.boundary + this.twoHyphens + this.crlf);
 
                 request.flush();
                 request.close();
@@ -80,7 +81,8 @@ public class Updater {
                 out = s.hasNext() ? s.next() : "";
 
             } catch (Exception x) {
-                out = "Update failed, rebooting!";
+                out = "Update failed.";
+                Log.e("WTF", "send: ", x);
             }
             return out;
         }

@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CryptoGarage.iml" filepath="$PROJECT_DIR$/CryptoGarage.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libcryptogarage/libcryptogarage.iml" filepath="$PROJECT_DIR$/libcryptogarage/libcryptogarage.iml" />
-      <module fileurl="file://$PROJECT_DIR$/wear/wear.iml" filepath="$PROJECT_DIR$/wear/wear.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CryptoGarage.iml" filepath="$PROJECT_DIR$/CryptoGarage.iml" group="CryptoGarage" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="CryptoGarage/app" />
+      <module fileurl="file://$PROJECT_DIR$/libcryptogarage/libcryptogarage.iml" filepath="$PROJECT_DIR$/libcryptogarage/libcryptogarage.iml" group="CryptoGarage/libcryptogarage" />
+      <module fileurl="file://$PROJECT_DIR$/wear/wear.iml" filepath="$PROJECT_DIR$/wear/wear.iml" group="CryptoGarage/wear" />
     </modules>
   </component>
 </project>

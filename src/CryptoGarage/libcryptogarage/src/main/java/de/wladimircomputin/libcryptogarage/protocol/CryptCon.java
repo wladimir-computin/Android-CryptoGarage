@@ -22,6 +22,8 @@ public class CryptCon {
     private UDPCon_async udpCon_async;
     private ChallengeManager challengeManager;
 
+    private static boolean SEMAPHORE = true;
+
     public enum Mode {UDP, TCP}
 
 
@@ -55,16 +57,44 @@ public class CryptCon {
     }
 
     public void sendMessageEncrypted(String message, Mode mode, CryptConReceiver receiver){
-        receiver.onProgress("Connecting...\n", 25);
-        String last_challenge_request = challengeManager.getCurrentChallenge();
-        if(last_challenge_request.isEmpty()) {
-            phase1(message, mode, receiver);
+        CryptConReceiver receiver2 = new CryptConReceiver() {
+            @Override
+            public void onSuccess(Content response) {
+                receiver.onSuccess(response);
+            }
+
+            @Override
+            public void onFail() {
+                receiver.onFail();
+            }
+
+            @Override
+            public void onFinished() {
+                SEMAPHORE = true;
+                receiver.onFinished();
+            }
+
+            @Override
+            public void onProgress(String sprogress, int iprogress) {
+                receiver.onProgress(sprogress, iprogress);
+            }
+        };
+        if(SEMAPHORE) {
+            SEMAPHORE = false;
+            receiver2.onProgress("Connecting...\n", 25);
+            String last_challenge_request = challengeManager.getCurrentChallenge();
+            if(last_challenge_request.isEmpty()) {
+                phase1(message, mode, receiver2);
+            } else {
+                Message m = new Message();
+                m.challenge_request_b64 = last_challenge_request;
+                m.type = MessageType.HELLO;
+                phase2(m, message, mode, receiver2);
+                challengeManager.resetChallenge();
+            }
         } else {
-            Message m = new Message();
-            m.challenge_request_b64 = last_challenge_request;
-            m.type = MessageType.HELLO;
-            phase2(m, message, mode, receiver);
-            challengeManager.resetChallenge();
+            receiver2.onFail();
+            receiver2.onFinished();
         }
     }
 
@@ -165,7 +195,6 @@ public class CryptCon {
                             receiver.onFail();
                             receiver.onFinished();
                         }
-
                     }
 
                     @Override
@@ -180,6 +209,11 @@ public class CryptCon {
                         receiver.onFinished();
                     }
                 });
+            } else {
+                netCon_async.close();
+                receiver.onProgress("Error: Decryption failed\n", 50);
+                receiver.onFail();
+                receiver.onFinished();
             }
         } else {
             netCon_async.close();

@@ -10,6 +10,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.util.Log;
 
 import de.wladimircomputin.libcryptogarage.net.TCPCon;
 
@@ -71,10 +72,15 @@ public class WiFi {
     public boolean isConnectedTo(String ssid){
         if (isWifiEnabled()) {
             WifiInfo inf = wifiManager.getConnectionInfo();
-            return inf.getSupplicantState() == SupplicantState.COMPLETED && inf.getSSID().contains(ssid);
-        } else {
-            return false;
+            if (inf.getSupplicantState() == SupplicantState.COMPLETED) {
+                if (inf.getSSID().contains(ssid)) {
+                    return true;
+                } else if (inf.getSSID().equals("<unknown ssid>")) {
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     private int getNetId(String ssid){

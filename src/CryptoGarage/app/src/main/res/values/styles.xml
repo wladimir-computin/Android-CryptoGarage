@@ -8,6 +8,7 @@
         <item name="colorAccent">@android:color/holo_green_light</item>
         <item name="android:windowBackground">@android:color/background_dark</item>
         <item name="android:colorBackground">@android:color/background_dark</item>
+        <item name="android:windowTranslucentNavigation">true</item>
     </style>
 
 </resources>

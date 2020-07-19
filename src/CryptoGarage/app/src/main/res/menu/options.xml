@@ -16,6 +16,9 @@
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="Settings" />
     <item
+        android:id="@+id/menu_status"
+        android:title="Status" />
+    <item
         android:id="@+id/menu_about"
         android:title="About" />
 </menu>

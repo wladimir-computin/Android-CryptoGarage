@@ -8,6 +8,7 @@
     <string name="command_hello" translatable="false">hellofriend</string>
     <string name="command_trigger" translatable="false">trigger</string>
     <string name="command_autotrigger" translatable="false">autotrigger</string>
+    <string name="command_gatestate" translatable="false">gatestate</string>
     <string name="command_setDevicePass" translatable="false">setDevicePass:</string>
     <string name="command_setSSID" translatable="false">setSSID:</string>
     <string name="command_setWifiPass" translatable="false">setWIFIPass:</string>

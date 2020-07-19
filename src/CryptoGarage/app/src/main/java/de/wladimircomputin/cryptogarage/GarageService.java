@@ -15,6 +15,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Vibrator;
 import android.util.Log;
+import android.widget.Toast;
 
 import de.wladimircomputin.cryptogarage.util.Awake;
 import de.wladimircomputin.cryptogarage.util.GaragePing;
@@ -219,7 +220,8 @@ public class GarageService extends Service {
                 public void onFail() {
                     if(failcount < failcount_limit){
                         callbacks.logMessage("Trying again...");
-                        Looper.prepare();
+                        if (Looper.myLooper()==null)
+                            Looper.prepare();
                         failcount++;
                         failsafe_trigger(this, 250);
                     } else {
@@ -315,8 +317,36 @@ public class GarageService extends Service {
         });
     }
 
+    public void getGateState(final CryptConReceiver c){
+        cc.sendMessageEncrypted(getString(R.string.command_gatestate), CryptCon.Mode.UDP, c);
+    }
+
     public void reboot(final CryptConReceiver c){
         cc.sendMessageEncrypted(getString(R.string.command_reboot), new CryptConReceiver() {
+            @Override
+            public void onSuccess(Content response) {
+                c.onSuccess(response);
+            }
+
+            @Override
+            public void onFail() {
+                c.onFail();
+            }
+
+            @Override
+            public void onFinished() {
+                c.onFinished();
+            }
+
+            @Override
+            public void onProgress(String sprogress, int iprogress) {
+                c.onProgress(sprogress, iprogress);
+            }
+        });
+    }
+
+    public void getStatus(final CryptConReceiver c){
+        cc.sendMessageEncrypted(getString(R.string.command_status), new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
                 c.onSuccess(response);
