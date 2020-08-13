@@ -15,7 +15,7 @@ public abstract class NetCon {
     protected String ip = "";
     protected int port;
 
-    public abstract String sendMessage(String message);
+    public abstract String sendMessage(String message, int retries);
 
     public NetCon(String ip, int port, Context context) {
         this.ip = ip;

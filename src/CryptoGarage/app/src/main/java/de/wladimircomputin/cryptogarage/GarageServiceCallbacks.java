@@ -11,6 +11,7 @@ public interface GarageServiceCallbacks {
     void autotriggerCycleEnd();
     void logMessage(String message);
     void setProgress(String progressbar, int progress);
+    void wifiAlreadyConnected();
     void wifiConnected();
     void wifiDisconnected();
 }

@@ -68,6 +68,7 @@ public class GarageService extends Service {
         this.autotrigger_timeout = Integer.valueOf(sharedPref.getString(getString(R.string.preference_autotrigger_timeout_key), getString(R.string.preference_autotrigger_timeout_default))) * 1000;
         this.wifimode = sharedPref.getString(getString(R.string.preference_wifimode_key), getString(R.string.preference_wifimode_default));
         this.callbacks = callbacks;
+
         wifi = WiFi.instance(this.getApplicationContext());
         cc = new CryptCon(devPass, ip, this, true);
         vib = (Vibrator) getSystemService(VIBRATOR_SERVICE);
@@ -79,7 +80,9 @@ public class GarageService extends Service {
     }
 
     public void init_wifi(BroadcastReceiver receiver, boolean aggressiveConnect){
-        wifi.setWifiEnabled(true);
+        if(!wifi.isWifiEnabled()) {
+            wifi.setWifiEnabled(true);
+        }
         try {
             this.registerReceiver(receiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
         } catch (Exception x){}
@@ -93,8 +96,13 @@ public class GarageService extends Service {
             }
             callbacks.wifiDisconnected();
         } else {
-            callbacks.wifiConnected();
+            callbacks.wifiAlreadyConnected();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        unregisterReceiver(wifi_init_receiver);
     }
 
     public BroadcastReceiver wifi_init_receiver = new BroadcastReceiver() {
@@ -318,7 +326,7 @@ public class GarageService extends Service {
     }
 
     public void getGateState(final CryptConReceiver c){
-        cc.sendMessageEncrypted(getString(R.string.command_gatestate), CryptCon.Mode.UDP, c);
+        cc.sendMessageEncrypted(getString(R.string.command_gatestate), CryptCon.Mode.UDP, 1, c);
     }
 
     public void reboot(final CryptConReceiver c){

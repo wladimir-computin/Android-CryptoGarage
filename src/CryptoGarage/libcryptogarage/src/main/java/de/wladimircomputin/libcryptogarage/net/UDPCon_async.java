@@ -24,13 +24,13 @@ public class UDPCon_async implements NetCon_async{
     }
 
     @Override
-    public void sendMessage(final String message, final ConReceiver callback){
-        sendMessage(message, false, callback);
+    public void sendMessage(final String message, int retries , final ConReceiver callback){
+        sendMessage(message, false, retries, callback);
     }
 
-    public void sendMessage(final String message, boolean broadcast, final ConReceiver callback){
+    public void sendMessage(final String message, boolean broadcast, int retries, final ConReceiver callback){
         new Thread(() -> {
-            final String out = UDPCon_sync.sendMessage(message, broadcast);
+            final String out = UDPCon_sync.sendMessage(message, broadcast, retries);
             if (!out.contains(NetCon.ERROR_HEADER)) {
                 callback.onResponseReceived(out);
             } else {

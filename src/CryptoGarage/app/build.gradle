@@ -16,8 +16,8 @@ android {
         applicationId "de.wladimircomputin.cryptogarage"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 7
-        versionName "5.1"
+        versionCode 8
+        versionName "5.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         resConfigs "en", "de"
@@ -26,7 +26,6 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

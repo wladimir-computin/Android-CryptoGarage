@@ -24,9 +24,9 @@ public class TCPCon_async implements NetCon_async {
     }
 
     @Override
-    public void sendMessage(final String message, final ConReceiver callback){
+    public void sendMessage(final String message, int retries, final ConReceiver callback){
         new Thread(() -> {
-            final String out = tcpCon_sync.sendMessage(message);
+            final String out = tcpCon_sync.sendMessage(message, retries);
             if (!out.contains(NetCon.ERROR_HEADER)) {
                 callback.onResponseReceived(out);
             } else {

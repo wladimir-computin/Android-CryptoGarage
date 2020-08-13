@@ -35,8 +35,8 @@ public class TCPCon extends NetCon{
         super(ip, port, context);
     }
 
-    public String sendMessage(String message) {
-        for (int failcount = 0; failcount < 4; failcount++){
+    public String sendMessage(String message, int retries) {
+        for (int failcount = 0; failcount < retries; failcount++){
             try {
                 if (connect(ip, port)) {
                     out.println(packMessage(message));

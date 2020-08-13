@@ -1,6 +1,9 @@
 package de.wladimircomputin.cryptogarage;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -23,10 +26,12 @@ import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -61,12 +66,15 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
 
     WiFi wifi;
     SharedPreferences sharedPref;
+    Handler gateStateHandler = new Handler();
 
     String ip;
     String devPass;
     String ssid;
     String pass;
     int autotrigger_timeout;
+
+    GateState currentGateState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,21 +128,27 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     @Override
     protected void onResume(){
         super.onResume();
+        attachUpdateGatestate(500);
     }
 
     @Override
     protected void onStop(){
         super.onStop();
-        //if (garageBound) {
-        //    unbindService(mConnection);
-        //    garageBound = false;
-        //}
-        //stopService(new Intent(this, GarageService.class));
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        detachUpdateGatestate();
     }
 
     @Override
     protected void onDestroy(){
         super.onDestroy();
+        if (garageBound) {
+            unbindService(mConnection);
+            garageBound = false;
+        }
         stopService(new Intent(this, GarageService.class));
     }
 
@@ -224,6 +238,21 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         reboot();
     }
 
+    private void attachUpdateGatestate(int after){
+        detachUpdateGatestate();
+        gateStateHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateGateState(null);
+                gateStateHandler.postDelayed(this, 5000);
+            }
+        }, after);
+    }
+
+    private void detachUpdateGatestate(){
+        gateStateHandler.removeCallbacksAndMessages(null);
+    }
+
     public void trigger(){
         garage.failsafe_trigger(new CryptConReceiver() {
             @Override
@@ -248,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
             @Override
             public void onFinished() {
                 setProgress("trigger", -1);
-                updateGateState(null);
+                attachUpdateGatestate(300);
             }
 
             @Override
@@ -285,7 +314,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
             public void onFinished() {
                 setProgress("autotrigger", -1);
                 setProgressIndeterminate(garage.isAutotrigger_active());
-                updateGateState(null);
+                attachUpdateGatestate(300);
             }
 
             @Override
@@ -320,18 +349,54 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     }
 
     public void updateGateState(View view){
+        Log.d("WTF", "updateGateState: ");
         garage.getGateState(new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
                 runOnUiThread(() -> {
                     GateState gateState = GateState.valueOf(response.data);
-                    statusImageView.setImageDrawable(getDrawable(gateState.getIcon()));
+                    if(!gateState.equals(currentGateState)) {
+                        ObjectAnimator scaleXAnimation = ObjectAnimator.ofFloat(statusImageView, "scaleX", 1.0f, 20.0f);
+                        scaleXAnimation.setInterpolator(new AccelerateInterpolator());
+                        scaleXAnimation.setDuration(500);
+                        ObjectAnimator scaleYAnimation = ObjectAnimator.ofFloat(statusImageView, "scaleY", 1.0f, 20.0f);
+                        scaleYAnimation.setInterpolator(new AccelerateInterpolator());
+                        scaleYAnimation.setDuration(500);
+                        ObjectAnimator alphaAnimation = ObjectAnimator.ofFloat(statusImageView, "alpha", 1.0F, 0F);
+                        alphaAnimation.setInterpolator(new AccelerateInterpolator());
+                        alphaAnimation.setDuration(200);
+
+                        AnimatorSet animatorSet = new AnimatorSet();
+                        animatorSet.play(scaleXAnimation).with(scaleYAnimation).with(alphaAnimation);
+                        animatorSet.start();
+                        animatorSet.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation, boolean isReverse) {
+                                statusImageView.setImageDrawable(getDrawable(gateState.getIcon()));
+                                ObjectAnimator scaleXAnimation = ObjectAnimator.ofFloat(statusImageView, "scaleX", 0.0f, 1.0f);
+                                scaleXAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+                                scaleXAnimation.setDuration(500);
+                                ObjectAnimator scaleYAnimation = ObjectAnimator.ofFloat(statusImageView, "scaleY", 0.0f, 1.0f);
+                                scaleYAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+                                scaleYAnimation.setDuration(500);
+                                ObjectAnimator alphaAnimation = ObjectAnimator.ofFloat(statusImageView, "alpha", 0.0F, 1.0f);
+                                alphaAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+                                alphaAnimation.setDuration(500);
+                                AnimatorSet animatorSet = new AnimatorSet();
+                                animatorSet.play(scaleXAnimation).with(scaleYAnimation).with(alphaAnimation);
+                                animatorSet.start();
+                            }
+                        });
+                    }
+                    currentGateState = gateState;
                 });
             }
 
             @Override
             public void onFail() {
-
+                runOnUiThread(() -> {
+                    statusImageView.setImageDrawable(getDrawable(GateState.GATE_NONE.getIcon()));
+                });
             }
 
             @Override
@@ -480,9 +545,15 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         runOnUiThread(() -> {
             triggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
             autotriggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
-            statusImageView.setImageDrawable(getDrawable(GateState.GATE_NONE.getIcon()));
         });
-        updateGateState(null);
+    }
+
+    @Override
+    public void wifiAlreadyConnected() {
+        runOnUiThread(() -> {
+            triggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
+            autotriggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
+        });
     }
 
     @Override

@@ -5,7 +5,6 @@
     <string name="header_ok" translatable="false">OK</string>
     <string name="header_data" translatable="false">DATA</string>
     <string name="header_error" translatable="false">FAIL</string>
-    <string name="command_hello" translatable="false">hellofriend</string>
     <string name="command_trigger" translatable="false">trigger</string>
     <string name="command_autotrigger" translatable="false">autotrigger</string>
     <string name="command_gatestate" translatable="false">gatestate</string>
@@ -13,7 +12,9 @@
     <string name="command_setSSID" translatable="false">setSSID:</string>
     <string name="command_setWifiPass" translatable="false">setWIFIPass:</string>
     <string name="command_setWifiMode" translatable="false" tools:ignore="ExtraTranslation">setWIFIMode:</string>
-    <string name="command_setAutotriggerTimeout" translatable="false">setAutotriggerTimeout:</string>
+    <string name="command_readSettings" translatable="false">reads</string>
+    <string name="command_writeSettings" translatable="false">writes</string>
+    <string name="command_setAutotriggerTimeout" translatable="false">writes:Garage:autotrigger_timeout:</string>
     <string name="command_getStatus" translatable="false">getStatus</string>
     <string name="command_ping" translatable="false">ping</string>
     <string name="command_save" translatable="false">save</string>

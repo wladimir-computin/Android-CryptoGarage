@@ -28,8 +28,12 @@ public class UDPCon extends NetCon{
         this.broadcast_ip = context.getString(R.string.broadcast_ip_default);
     }
 
-    public String sendMessage(String message, boolean broadcast){
-        for (int failcount = 0; failcount < 4; failcount++) {
+    public String sendMessage(String message, int retries){
+        return sendMessage(message, false, retries);
+    }
+
+    public String sendMessage(String message, boolean broadcast, int retries){
+        for (int failcount = 0; failcount < retries; failcount++) {
             String out = "";
             try {
                 DatagramSocket udpSocket = new DatagramSocket();
@@ -64,10 +68,6 @@ public class UDPCon extends NetCon{
         }
 
         return ERROR_HEADER + "No Connection";
-    }
-
-    public String sendMessage(String message){
-        return sendMessage(message, false);
     }
 
 }

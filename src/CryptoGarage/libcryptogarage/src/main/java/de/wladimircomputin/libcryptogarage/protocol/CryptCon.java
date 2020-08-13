@@ -34,7 +34,7 @@ public class CryptCon {
     public CryptCon(String pass, String ip, Context context, boolean newinstance){
         this.crypt = Crypter.init(pass, context);
         this.context = context;
-        challengeManager = ChallengeManager.instance(context);
+        this.challengeManager = ChallengeManager.instance(context);
         tcpCon_async = new TCPCon_async(ip, 4646, context, newinstance);
         udpCon_async = new UDPCon_async(ip, 4647, context, newinstance);
     }
@@ -57,6 +57,10 @@ public class CryptCon {
     }
 
     public void sendMessageEncrypted(String message, Mode mode, CryptConReceiver receiver){
+        sendMessageEncrypted(message, mode, 4, receiver);
+    }
+
+    public void sendMessageEncrypted(String message, Mode mode, int retries, CryptConReceiver receiver){
         CryptConReceiver receiver2 = new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
@@ -84,12 +88,12 @@ public class CryptCon {
             receiver2.onProgress("Connecting...\n", 25);
             String last_challenge_request = challengeManager.getCurrentChallenge();
             if(last_challenge_request.isEmpty()) {
-                phase1(message, mode, receiver2);
+                phase1(message, mode, retries, receiver2);
             } else {
                 Message m = new Message();
                 m.challenge_request_b64 = last_challenge_request;
                 m.type = MessageType.HELLO;
-                phase2(m, message, mode, receiver2);
+                phase2(m, message, mode, retries, receiver2);
                 challengeManager.resetChallenge();
             }
         } else {
@@ -99,7 +103,7 @@ public class CryptCon {
     }
 
     public void discoverDevices(CryptConReceiver receiver){
-        udpCon_async.sendMessage(MessageType.HELLO + ":::" + context.getString(R.string.command_discover), true, new ConReceiver() {
+        udpCon_async.sendMessage(MessageType.HELLO + ":::" + context.getString(R.string.command_discover), true, 1,  new ConReceiver() {
 
             @Override
             public void onResponseReceived(String responseData) {
@@ -118,19 +122,19 @@ public class CryptCon {
         });
     }
 
-    private void phase1(final String command, Mode mode, final CryptConReceiver receiver) {
+    private void phase1(final String command, Mode mode, int retries, final CryptConReceiver receiver) {
         NetCon_async netCon_async = getNetCon(mode);
 
         Message hello = encryptToMessage(MessageType.HELLO, "", "");
 
         if (hello != null) {
 
-            netCon_async.sendMessage(hello.toEncryptedString(), new ConReceiver() {
+            netCon_async.sendMessage(hello.toEncryptedString(), retries, new ConReceiver() {
                 @Override
                 public void onResponseReceived(String responseData) {
                     receiver.onProgress("Got encrypted challenge!\n", 50);
                     Message response = decryptRawMessage(responseData, hello.challenge_request_b64);
-                    phase2(response, command, mode, receiver);
+                    phase2(response, command, mode, retries, receiver);
                 }
 
                 @Override
@@ -153,7 +157,7 @@ public class CryptCon {
         }
     }
 
-    private void phase2(Message response, String command, Mode mode, final CryptConReceiver receiver) {
+    private void phase2(Message response, String command, Mode mode, int retries, final CryptConReceiver receiver) {
         NetCon_async netCon_async = getNetCon(mode);
 
         //do some verification here
@@ -163,7 +167,7 @@ public class CryptCon {
             if(data != null) {
                 receiver.onProgress("Sending encrypted command...\n", 75);
 
-                netCon_async.sendMessage(data.toEncryptedString(), new ConReceiver() {
+                netCon_async.sendMessage(data.toEncryptedString(), retries, new ConReceiver() {
                     @Override
                     public void onResponseReceived(String responseData) {
                         //decrypt
