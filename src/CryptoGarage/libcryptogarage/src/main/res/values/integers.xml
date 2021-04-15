@@ -2,5 +2,5 @@
 <resources>
     <integer name="sha_rounds">5000</integer>
     <integer name="max_message_len">1000</integer>
-    <integer name="challenge_validity_timeout">10000</integer>
+    <integer name="challenge_validity_timeout">60000</integer>
 </resources>

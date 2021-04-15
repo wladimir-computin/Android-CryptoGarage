@@ -4,5 +4,6 @@
         <item>AP</item>
         <item>Hybrid</item>
         <item>Client</item>
+        <item>Remote</item>
     </string-array>
 </resources>

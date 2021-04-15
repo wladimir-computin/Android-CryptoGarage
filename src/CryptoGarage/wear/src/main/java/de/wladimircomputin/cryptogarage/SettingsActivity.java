@@ -54,6 +54,9 @@ public class SettingsActivity extends WearableActivity {
         Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show();
     }
 
+    public void scan_click(View view) {
+    }
+
     private class SettingsPack{
         private EditText editText;
         private ProgressBar progressBar;

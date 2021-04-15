@@ -19,12 +19,14 @@
 
     <string name="preference_file_key" translatable="false">de.wladimircomputin.cryptogarage.settings</string>
     <string name="preference_ip_key" translatable="false">wifimode_ip</string>
+    <string name="preference_remote_key" translatable="false">wifimode_remote</string>
     <string name="preference_devpass_key" translatable="false">devpass</string>
     <string name="preference_wifimode_key" translatable="false">wifimode</string>
     <string name="preference_wlanssid_key" translatable="false">wlanssid</string>
     <string name="preference_wlanpass_key" translatable="false">wlanpass</string>
     <string name="preference_autotrigger_timeout_key" translatable="false">autotrigger_timeout</string>
     <string name="preference_ip_default" translatable="false">192.168.4.1</string>
+    <string name="preference_remote_default" translatable="false">server:port</string>
     <string name="preference_devpass_default" translatable="false">TestTest1</string>
     <string name="preference_wifimode_default" translatable="false">AP</string>
     <string name="preference_wlanssid_default" translatable="false">GarageTest</string>

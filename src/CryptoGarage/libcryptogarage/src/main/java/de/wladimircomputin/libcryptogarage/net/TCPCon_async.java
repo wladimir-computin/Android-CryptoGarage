@@ -2,8 +2,6 @@ package de.wladimircomputin.libcryptogarage.net;
 
 import android.content.Context;
 
-import de.wladimircomputin.libcryptogarage.R;
-
 /**
  * Created by spamd on 07.01.2018.
  */
@@ -12,15 +10,7 @@ public class TCPCon_async implements NetCon_async {
     public TCPCon tcpCon_sync;
 
     public TCPCon_async(String url, int port, Context context){
-        tcpCon_sync = TCPCon.instance(url, port, context);
-    }
-
-    public TCPCon_async(String url, int port, Context context, boolean newinstance){
-        if(!newinstance) {
-            new TCPCon_async(url, port, context);
-        } else {
-            tcpCon_sync = new TCPCon(url, port, context);
-        }
+        tcpCon_sync = new TCPCon(url, port, context);
     }
 
     @Override

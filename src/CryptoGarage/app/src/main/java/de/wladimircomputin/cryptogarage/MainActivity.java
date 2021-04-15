@@ -2,10 +2,10 @@ package de.wladimircomputin.cryptogarage;
 
 import android.Manifest;
 import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -13,29 +13,20 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Location;
-import android.net.wifi.SupplicantState;
-import android.net.wifi.WifiInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -43,13 +34,14 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.security.acl.Permission;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import de.wladimircomputin.cryptogarage.util.GateState;
 import de.wladimircomputin.cryptogarage.util.WiFi;
 import de.wladimircomputin.libcryptogarage.protocol.Content;
 import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
-import de.wladimircomputin.libcryptogarage.protocol.Crypter;
 
 public class MainActivity extends AppCompatActivity implements GarageServiceCallbacks{
 
@@ -72,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     String devPass;
     String ssid;
     String pass;
-    int autotrigger_timeout;
+    String wifimode;
 
     GateState currentGateState;
 
@@ -101,20 +93,15 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         sharedPref = this.getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         //cc = new CryptCon(sharedPref.getString(getString(R.string.preference_devpass_key), getString(R.string.preference_devpass_default)), this);
 
-        ip = sharedPref.getString(getString(R.string.preference_ip_key), getString(R.string.preference_ip_default));
-        devPass = sharedPref.getString(getString(R.string.preference_devpass_key), getString(R.string.preference_devpass_default));
-        ssid = sharedPref.getString(getString(R.string.preference_wlanssid_key), getString(R.string.preference_wlanssid_default));
-        pass = sharedPref.getString(getString(R.string.preference_wlanpass_key), getString(R.string.preference_wlanpass_default));
-        autotrigger_timeout = Integer.valueOf(sharedPref.getString(getString(R.string.preference_autotrigger_timeout_key), getString(R.string.preference_autotrigger_timeout_default)));
+        wifimode = sharedPref.getString(getString(R.string.preference_wifimode_key), getString(R.string.preference_wifimode_default));
 
-        wifi = WiFi.instance(this.getApplicationContext());
+        if(!wifimode.equals("Remote")) {
+            wifi = WiFi.instance(this.getApplicationContext());
+            this.ssid = sharedPref.getString(getString(R.string.preference_wlanssid_key), getString(R.string.preference_wlanssid_default));
+        }
 
         if (savedInstanceState != null) {
-            ip = savedInstanceState.getString("ip");
-            devPass = savedInstanceState.getString("devPass");
-            ssid = savedInstanceState.getString("ssid");
-            pass = savedInstanceState.getString("pass");
-            autotrigger_timeout = savedInstanceState.getInt("autotrigger_timeout");
+            wifimode = savedInstanceState.getString("wifimode");
         }
 
         Intent intent = new Intent(this, GarageService.class);
@@ -153,12 +140,18 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     }
 
     @Override
+    public void onBackPressed() {
+        if (garageBound) {
+            unbindService(mConnection);
+            garageBound = false;
+        }
+        stopService(new Intent(this, GarageService.class));
+        finishAndRemoveTask();
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putString("ip", ip);
-        outState.putString("devPass", devPass);
-        outState.putString("ssid", ssid);
-        outState.putString("pass", pass);
-        outState.putInt("autotrigger_timeout", autotrigger_timeout);
+        outState.putString("wifimode", wifimode);
         super.onSaveInstanceState(outState);
     }
 
@@ -215,22 +208,28 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
 
     public void trigger_click(View view) {
         garage.autotriggerStopSearch();
-        garage.init_wifi(garage.wifi_init_receiver,false);
+        if(!wifimode.equals("Remote")) {
+            garage.init_wifi(garage.wifi_init_receiver, false);
+        }
         trigger();
     }
 
     public void autotrigger_click(View view) {
-        if(wifi.isConnectedTo(ssid)){
-            autotrigger();
-        } else if(garage.isAutotrigger_searching()){
-            garage.autotriggerStopSearch();
-            setProgressIndeterminate(false);
-        } else if (!garage.isAutotrigger_active()) {
-            setProgressIndeterminate(true, 1);
-            garage.init_wifi(garage.autotrigger_receiver, true);
-        } else if (garage.isAutotrigger_active()) {
-            garage.autotrigger_finish.run();
-            setProgressIndeterminate(false);
+        if(!wifimode.equals("Remote")) {
+            if (wifi.isConnectedTo(ssid)) {
+                autotrigger();
+            } else if (garage.isAutotrigger_searching()) {
+                garage.autotriggerStopSearch();
+                setProgressIndeterminate(false);
+            } else if (!garage.isAutotrigger_active()) {
+                setProgressIndeterminate(true, 1);
+                garage.init_wifi(garage.autotrigger_receiver, true);
+            } else if (garage.isAutotrigger_active()) {
+                garage.autotrigger_finish.run();
+                setProgressIndeterminate(false);
+            }
+        } else {
+            trigger();
         }
     }
 
@@ -349,53 +348,52 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     }
 
     public void updateGateState(View view){
-        Log.d("WTF", "updateGateState: ");
         garage.getGateState(new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
                 runOnUiThread(() -> {
+                    triggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
+                    autotriggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
                     GateState gateState = GateState.valueOf(response.data);
                     if(!gateState.equals(currentGateState)) {
-                        ObjectAnimator scaleXAnimation = ObjectAnimator.ofFloat(statusImageView, "scaleX", 1.0f, 20.0f);
-                        scaleXAnimation.setInterpolator(new AccelerateInterpolator());
-                        scaleXAnimation.setDuration(500);
-                        ObjectAnimator scaleYAnimation = ObjectAnimator.ofFloat(statusImageView, "scaleY", 1.0f, 20.0f);
-                        scaleYAnimation.setInterpolator(new AccelerateInterpolator());
-                        scaleYAnimation.setDuration(500);
-                        ObjectAnimator alphaAnimation = ObjectAnimator.ofFloat(statusImageView, "alpha", 1.0F, 0F);
-                        alphaAnimation.setInterpolator(new AccelerateInterpolator());
-                        alphaAnimation.setDuration(200);
-
-                        AnimatorSet animatorSet = new AnimatorSet();
-                        animatorSet.play(scaleXAnimation).with(scaleYAnimation).with(alphaAnimation);
+                        AnimatorSet animatorSet = (AnimatorSet) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.gate_state_transition_1);
+                        animatorSet.setTarget(statusImageView);
                         animatorSet.start();
                         animatorSet.addListener(new AnimatorListenerAdapter() {
                             @Override
                             public void onAnimationEnd(Animator animation, boolean isReverse) {
                                 statusImageView.setImageDrawable(getDrawable(gateState.getIcon()));
-                                ObjectAnimator scaleXAnimation = ObjectAnimator.ofFloat(statusImageView, "scaleX", 0.0f, 1.0f);
-                                scaleXAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-                                scaleXAnimation.setDuration(500);
-                                ObjectAnimator scaleYAnimation = ObjectAnimator.ofFloat(statusImageView, "scaleY", 0.0f, 1.0f);
-                                scaleYAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-                                scaleYAnimation.setDuration(500);
-                                ObjectAnimator alphaAnimation = ObjectAnimator.ofFloat(statusImageView, "alpha", 0.0F, 1.0f);
-                                alphaAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-                                alphaAnimation.setDuration(500);
-                                AnimatorSet animatorSet = new AnimatorSet();
-                                animatorSet.play(scaleXAnimation).with(scaleYAnimation).with(alphaAnimation);
+                                AnimatorSet animatorSet = (AnimatorSet) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.gate_state_transition_2);
+                                animatorSet.setTarget(statusImageView);
                                 animatorSet.start();
                             }
                         });
+                        currentGateState = gateState;
                     }
-                    currentGateState = gateState;
                 });
             }
 
             @Override
             public void onFail() {
                 runOnUiThread(() -> {
-                    statusImageView.setImageDrawable(getDrawable(GateState.GATE_NONE.getIcon()));
+                    triggerButton.setTextColor(Color.GRAY);
+                    autotriggerButton.setTextColor(Color.GRAY);
+                    GateState gateState = GateState.GATE_NONE;
+                    if(!gateState.equals(currentGateState)) {
+                        AnimatorSet animatorSet = (AnimatorSet) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.gate_state_transition_1);
+                        animatorSet.setTarget(statusImageView);
+                        animatorSet.start();
+                        animatorSet.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation, boolean isReverse) {
+                                statusImageView.setImageDrawable(getDrawable(gateState.getIcon()));
+                                AnimatorSet animatorSet = (AnimatorSet) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.gate_state_transition_2);
+                                animatorSet.setTarget(statusImageView);
+                                animatorSet.start();
+                            }
+                        });
+                        currentGateState = gateState;
+                    }
                 });
             }
 
@@ -512,7 +510,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
 
     @Override
     public void autotriggerCountdown(boolean stop) {
-        runOnUiThread(() -> {
+    /*    runOnUiThread(() -> {
             if(!stop) {
                 setProgressIndeterminate(false);
                 if (autotrigger_timeout > 1) {
@@ -525,7 +523,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
             } else {
                 setProgressIndeterminate(true);
             }
-        });
+        });*/
     }
 
     @Override
@@ -574,7 +572,9 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
             garage = binder.getService();
             garageBound = true;
             garage.init(sharedPref, MainActivity.this);
-            garage.init_wifi(garage.wifi_init_receiver,false);
+            if(!wifimode.equals("Remote")) {
+                garage.init_wifi(garage.wifi_init_receiver, false);
+            }
             setProgressIndeterminate(garage.isAutotrigger_active() || garage.isAutotrigger_searching());
         }
 

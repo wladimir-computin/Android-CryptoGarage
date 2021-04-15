@@ -5,11 +5,11 @@ public class Content {
     public String data;
 
     public Content(){
-        new Content(MessageType.NOPE);
+        this(MessageType.NOPE);
     }
 
     public Content(MessageType type){
-        new Content(type, "");
+        this(type, "");
     }
 
     public Content(MessageType type, String data){

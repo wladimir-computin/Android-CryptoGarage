@@ -1,7 +1,5 @@
 package de.wladimircomputin.cryptogarage.util;
 
-import android.graphics.drawable.Drawable;
-
 import de.wladimircomputin.cryptogarage.R;
 
 public enum GateState {

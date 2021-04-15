@@ -1,42 +1,40 @@
 package de.wladimircomputin.libcryptogarage.protocol;
 
 import android.content.Context;
+import android.os.Looper;
 import android.util.Base64;
-import android.widget.Toast;
-
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 import de.wladimircomputin.libcryptogarage.R;
-import de.wladimircomputin.libcryptogarage.net.*;
+import de.wladimircomputin.libcryptogarage.net.ConReceiver;
+import de.wladimircomputin.libcryptogarage.net.NetCon_async;
+import de.wladimircomputin.libcryptogarage.net.TCPCon_async;
+import de.wladimircomputin.libcryptogarage.net.UDPCon_async;
 
 /**
  * Created by spamd on 11.03.2017.
  */
 
 public class CryptCon {
-    private Crypter crypt;
-    private Context context;
-    private TCPCon_async tcpCon_async;
-    private UDPCon_async udpCon_async;
-    private ChallengeManager challengeManager;
+    private final Crypter crypt;
+    private final Context context;
+    private final TCPCon_async tcpCon_async;
+    private final UDPCon_async udpCon_async;
+    private final ChallengeManager challengeManager;
 
-    private static boolean SEMAPHORE = true;
+    private boolean SEMAPHORE = true;
 
     public enum Mode {UDP, TCP}
 
-
-    public CryptCon(String pass, String ip, Context context){
-        new CryptCon(pass, ip, context, false);
+    public CryptCon(String pass, String ip, int port_tcp, int port_udp, Context context){
+        this.crypt = new Crypter(pass, context);
+        this.context = context;
+        this.challengeManager = new ChallengeManager(context);
+        tcpCon_async = new TCPCon_async(ip, port_tcp, context);
+        udpCon_async = new UDPCon_async(ip, port_udp, context);
     }
 
-    public CryptCon(String pass, String ip, Context context, boolean newinstance){
-        this.crypt = Crypter.init(pass, context);
-        this.context = context;
-        this.challengeManager = ChallengeManager.instance(context);
-        tcpCon_async = new TCPCon_async(ip, 4646, context, newinstance);
-        udpCon_async = new UDPCon_async(ip, 4647, context, newinstance);
+    public CryptCon(String pass, String ip, Context context){
+        this(pass, ip, 4646, 4647, context);
     }
 
     public void sendMessageEncrypted(String message){
@@ -53,7 +51,7 @@ public class CryptCon {
     }
 
     public void sendMessageEncrypted(String message, CryptConReceiver receiver){
-        sendMessageEncrypted(message, Mode.TCP, receiver);
+        sendMessageEncrypted(message, Mode.UDP, receiver);
     }
 
     public void sendMessageEncrypted(String message, Mode mode, CryptConReceiver receiver){
@@ -64,17 +62,18 @@ public class CryptCon {
         CryptConReceiver receiver2 = new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
+                SEMAPHORE = true;
                 receiver.onSuccess(response);
             }
 
             @Override
             public void onFail() {
+                SEMAPHORE = true;
                 receiver.onFail();
             }
 
             @Override
             public void onFinished() {
-                SEMAPHORE = true;
                 receiver.onFinished();
             }
 
@@ -93,7 +92,28 @@ public class CryptCon {
                 Message m = new Message();
                 m.challenge_request_b64 = last_challenge_request;
                 m.type = MessageType.HELLO;
-                phase2(m, message, mode, retries, receiver2);
+                phase2(m, message, mode, retries, new CryptConReceiver() {
+                    @Override
+                    public void onSuccess(Content response) {
+                        receiver2.onSuccess(response);
+                    }
+
+                    @Override
+                    public void onFail() {
+                        Looper.prepare();
+                        phase1(message, mode, retries, receiver2);
+                    }
+
+                    @Override
+                    public void onFinished() {
+                        receiver2.onFinished();
+                    }
+
+                    @Override
+                    public void onProgress(String sprogress, int iprogress) {
+                        receiver2.onProgress(sprogress, iprogress);
+                    }
+                });
                 challengeManager.resetChallenge();
             }
         } else {

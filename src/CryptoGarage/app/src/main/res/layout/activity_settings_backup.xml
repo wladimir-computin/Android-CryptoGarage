@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+    android:layout_marginTop="@dimen/activity_vertical_margin"
+    android:layout_marginRight="@dimen/activity_horizontal_margin"
+    android:layout_marginBottom="@dimen/activity_vertical_margin"
+    android:animateLayoutChanges="true"
+    android:fitsSystemWindows="true"
+    tools:context="de.wladimircomputin.cryptogarage.SettingsActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/L1"
+        android:layout_alignParentTop="true"
+        android:animateLayoutChanges="true"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:animateLayoutChanges="true"
+                android:orientation="horizontal"
+                android:weightSum="100">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="40"
+                    android:animateLayoutChanges="true"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="40"
+                        android:text="@string/settings_wifimode_textview"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="50"
+                        android:text="@string/settings_wifimode_textview_sub"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="65dp"
+                    android:layout_weight="60"
+                    android:animateLayoutChanges="true"
+                    android:orientation="vertical">
+
+                    <Spinner
+                        android:id="@+id/settings_wifimode_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="60"
+                        android:ems="10"
+                        android:entries="@array/wifimode_array" />
+
+                    <LinearLayout
+                        android:id="@+id/settings_wifimode_ip_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="60"
+                        android:animateLayoutChanges="true"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <EditText
+                            android:id="@+id/settings_wifimode_ip_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:layout_weight="60"
+                            android:ems="10"
+                            android:hint="@string/settings_wifimode_ip_hint"
+                            android:imeOptions="flagNoExtractUi"
+                            android:inputType="text"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                            android:textSize="16sp"
+                            android:visibility="visible" />
+
+                        <Button
+                            android:id="@+id/settings_wifimode_ip_button"
+                            android:layout_width="75dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="60"
+                            android:foreground="@android:drawable/ic_menu_search"
+                            android:foregroundGravity="center"
+                            android:onClick="scan_click" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/settings_wifimode_progress"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="5dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:animateLayoutChanges="true"
+                android:orientation="horizontal"
+                android:weightSum="100">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="40"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="40"
+                        android:text="@string/settings_wlanssid_textview"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="50"
+                        android:text="@string/settings_wlanssid_textview_sub"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/settings_wlanssid_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_weight="60"
+                    android:ems="10"
+                    android:hint="@string/settings_wlanssid_text_hint"
+                    android:imeOptions="flagNoExtractUi"
+                    android:inputType="text"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    android:textSize="16sp" />
+
+                <ProgressBar
+                    android:id="@+id/settings_wlanssid_progress"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="5dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:animateLayoutChanges="true"
+                android:orientation="horizontal"
+                android:weightSum="100">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="40"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="40"
+                        android:text="@string/settings_wlanpass_textview"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="50"
+                        android:text="@string/settings_wlanpass_textview_sub"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/settings_wlanpass_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_weight="60"
+                    android:ems="10"
+                    android:hint="@string/settings_wlanpass_text_hint"
+                    android:imeOptions="flagNoExtractUi"
+                    android:inputType="textVisiblePassword"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    android:textSize="16sp" />
+
+                <ProgressBar
+                    android:id="@+id/settings_wlanpass_progress"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="5dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:animateLayoutChanges="true"
+                android:orientation="horizontal"
+                android:weightSum="100">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="40"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="40"
+                        android:text="@string/settings_devpass_textview"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="50"
+                        android:text="@string/settings_devpass_textview_sub"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/settings_devpass_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_weight="60"
+                    android:ems="10"
+                    android:hint="@string/settings_devpass_text_hint"
+                    android:imeOptions="flagNoExtractUi"
+                    android:inputType="textVisiblePassword"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    android:textSize="16sp" />
+
+                <ProgressBar
+                    android:id="@+id/settings_devpass_progress"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="5dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/L1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:animateLayoutChanges="true"
+        android:orientation="horizontal"
+        android:weightSum="100">
+
+        <Switch
+            android:id="@+id/settings_lr_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="25"
+            android:checked="false"
+            android:text="Apply Remote"
+            android:textAlignment="textStart"
+            android:textColor="@color/colorAccent"
+            android:textOff="Remote"
+            android:textOn="Lokal" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="50" />
+
+        <Button
+            android:id="@+id/settings_save_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="25"
+            android:onClick="save_click"
+            android:text="Save" />
+
+    </LinearLayout>
+
+</RelativeLayout>

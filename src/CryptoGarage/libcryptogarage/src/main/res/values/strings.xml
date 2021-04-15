@@ -15,12 +15,11 @@
     <string name="command_readSettings" translatable="false">reads</string>
     <string name="command_writeSettings" translatable="false">writes</string>
     <string name="command_setAutotriggerTimeout" translatable="false">writes:Garage:autotrigger_timeout:</string>
-    <string name="command_getStatus" translatable="false">getStatus</string>
     <string name="command_ping" translatable="false">ping</string>
     <string name="command_save" translatable="false">save</string>
     <string name="command_reboot" translatable="false">reboot</string>
     <string name="command_reset" translatable="false">reset</string>
-    <string name="command_status" translatable="false">getStatus</string>
+    <string name="command_status" translatable="false">status</string>
     <string name="command_update" translatable="false">update</string>
     <string name="command_discover" translatable="false">discover</string>
     <string name="key_salt" translatable="false">FTh.!%B$</string>

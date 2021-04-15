@@ -1,19 +1,17 @@
 {
-  "version": 1,
+  "version": 2,
   "artifactType": {
     "type": "APK",
     "kind": "Directory"
   },
   "applicationId": "de.wladimircomputin.cryptogarage",
-  "variantName": "release",
+  "variantName": "processReleaseResources",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
-      "properties": [],
-      "versionCode": 8,
-      "versionName": "5.2",
-      "enabled": true,
+      "versionCode": 9,
+      "versionName": "6.0",
       "outputFile": "app-release.apk"
     }
   ]

@@ -6,10 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import de.wladimircomputin.libcryptogarage.R;
@@ -23,19 +23,11 @@ public class Crypter {
     private Cipher aes;
     private SecureRandom random;
 
-    private static Crypter instance;
-    private String devicePass;
+    private final static int GCM_IV_LENGTH = 12;
+    private final static int GCM_TAG_LENGTH = 16;
 
-    public static Crypter init(String devicePass, Context context){
-        if(instance == null){
-            instance = new Crypter(devicePass, context);
-        } else if (!instance.devicePass.equals(devicePass)){
-            instance = new Crypter(devicePass, context);
-        }
-        return instance;
-    }
 
-    private Crypter(String devicePass, Context context){
+    public Crypter(String devicePass, Context context){
         byte[] key = (devicePass + context.getResources().getString(R.string.key_salt)).getBytes(StandardCharsets.UTF_8);
         this.random = new SecureRandom();
         try {
@@ -46,16 +38,15 @@ public class Crypter {
             }
             this.secretKeySpec = new SecretKeySpec(Arrays.copyOf(key, 32), "AES");
             this.aes = Cipher.getInstance("AES/GCM/NoPadding");
-            this.devicePass = devicePass;
         } catch (Exception x){
             x.printStackTrace();
         }
     }
 
     public byte[] encrypt(byte[] message, byte[] iv){
-        if (iv.length == 12 && message != null) {
+        if (iv.length == GCM_IV_LENGTH && message != null) {
             try {
-                final GCMParameterSpec spec = new GCMParameterSpec(16 * 8, iv);
+                GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH * Byte.SIZE, iv);
                 aes.init(Cipher.ENCRYPT_MODE, secretKeySpec, spec);
                 return aes.doFinal(message);
             } catch (Exception x) {
@@ -66,12 +57,12 @@ public class Crypter {
     }
 
     public byte[] decrypt(byte[] message, byte[] iv, byte[] tag){
-        if (iv.length == 12 && tag.length == 16 &&  message != null) {
+        if (iv.length == GCM_IV_LENGTH && tag.length == GCM_TAG_LENGTH && message != null) {
             try {
                 byte[] messageWithTag = new byte[message.length + tag.length];
                 System.arraycopy(message, 0, messageWithTag, 0, message.length);
                 System.arraycopy(tag, 0, messageWithTag, message.length, tag.length);
-                final GCMParameterSpec spec = new GCMParameterSpec(16 * 8, iv);
+                GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH * Byte.SIZE, iv);
                 aes.init(Cipher.DECRYPT_MODE, secretKeySpec, spec);
                 return aes.doFinal(messageWithTag);
             } catch (Exception x) {

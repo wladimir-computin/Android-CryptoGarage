@@ -1,6 +1,8 @@
 package de.wladimircomputin.cryptogarage.util;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -10,9 +12,8 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
-import android.util.Log;
 
-import de.wladimircomputin.libcryptogarage.net.TCPCon;
+import androidx.core.app.ActivityCompat;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 import static android.content.Context.WIFI_SERVICE;
@@ -30,27 +31,30 @@ public class WiFi {
     private Awake awake;
     private boolean isAggressiveConnect;
     private int netId = -1;
+    private Context context;
 
-    private WiFi(Context context){
+    private WiFi(Context context) {
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(WIFI_SERVICE);
-        this.connMgr = (ConnectivityManager) context.getApplicationContext().getSystemService(CONNECTIVITY_SERVICE);;
+        this.connMgr = (ConnectivityManager) context.getApplicationContext().getSystemService(CONNECTIVITY_SERVICE);
+        ;
         connectHandler = new Handler();
         awake = new Awake(context);
+        this.context = context;
         bindOnNetwork();
     }
 
-    public static WiFi instance(Context context){
-        if(instance == null){
+    public static WiFi instance(Context context) {
+        if (instance == null) {
             instance = new WiFi(context);
         }
         return instance;
     }
 
-    public boolean isWifiEnabled(){
+    public boolean isWifiEnabled() {
         return wifiManager.isWifiEnabled();
     }
 
-    public void setWifiEnabled(boolean set){
+    public void setWifiEnabled(boolean set) {
         wifiManager.setWifiEnabled(set);
     }
 
@@ -60,7 +64,7 @@ public class WiFi {
         (new Thread() {
             public void run() {
                 int netId = getNetId(s);
-                if (netId != -1){
+                if (netId != -1) {
                     connectNetwork(netId);
                 } else {
                     connectNetwork(addNetwork(s, p));
@@ -69,7 +73,7 @@ public class WiFi {
         }).start();
     }
 
-    public boolean isConnectedTo(String ssid){
+    public boolean isConnectedTo(String ssid) {
         if (isWifiEnabled()) {
             WifiInfo inf = wifiManager.getConnectionInfo();
             if (inf.getSupplicantState() == SupplicantState.COMPLETED) {
@@ -83,18 +87,20 @@ public class WiFi {
         return false;
     }
 
-    private int getNetId(String ssid){
+    private int getNetId(String ssid) {
         try {
-            while (wifiManager.getConfiguredNetworks() == null) {
-                try {
-                    this.wait(100);
-                } catch (Exception x) {
-                    break;
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                while (wifiManager.getConfiguredNetworks() == null) {
+                    try {
+                        this.wait(100);
+                    } catch (Exception x) {
+                        break;
+                    }
                 }
-            }
-            for (WifiConfiguration wifiConfiguration : wifiManager.getConfiguredNetworks()) {
-                if (wifiConfiguration.SSID.equals("\"" + ssid + "\"")) {
-                    return wifiConfiguration.networkId;
+                for (WifiConfiguration wifiConfiguration : wifiManager.getConfiguredNetworks()) {
+                    if (wifiConfiguration.SSID.equals("\"" + ssid + "\"")) {
+                        return wifiConfiguration.networkId;
+                    }
                 }
             }
         } catch (Exception x){}

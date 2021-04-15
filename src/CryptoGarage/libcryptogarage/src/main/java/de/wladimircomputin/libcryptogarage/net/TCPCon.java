@@ -10,26 +10,17 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import de.wladimircomputin.libcryptogarage.R;
-
 /**
  * Created by spamd on 07.01.2018.
  */
 
-public class TCPCon extends NetCon{
+public class TCPCon extends NetCon {
 
     private static TCPCon instance;
 
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-
-    public static TCPCon instance(String url, int port, Context context){
-        if(instance == null){
-            instance = new TCPCon(url, port, context);
-        }
-        return instance;
-    }
 
     public TCPCon(String ip, int port, Context context) {
         super(ip, port, context);

@@ -1,9 +1,8 @@
 package de.wladimircomputin.libcryptogarage.protocol;
 
-import android.util.Base64;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import android.util.Base64;
 
 public class Message {
     public static final int IV_LEN = 12;
@@ -106,7 +105,7 @@ public class Message {
                     }
                 }
             }
-            } catch (Exception x){}
+        } catch (Exception x){}
         discardMessage();
         return this;
     }
@@ -116,6 +115,13 @@ public class Message {
             return new String(Base64.decode(data_b64, Base64.NO_WRAP));
         } catch (Exception x){}
         return "";
+    }
+
+    public byte[] getDataBinary(){
+        try {
+            return Base64.decode(data_b64, Base64.NO_WRAP);
+        } catch (Exception x){}
+        return null;
     }
 
     private boolean verifyChallenge(String challenge_request_b64, String challenge_response_b64){

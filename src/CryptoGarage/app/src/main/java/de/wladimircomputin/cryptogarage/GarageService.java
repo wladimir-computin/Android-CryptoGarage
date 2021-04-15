@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
@@ -14,8 +13,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Vibrator;
-import android.util.Log;
-import android.widget.Toast;
 
 import de.wladimircomputin.cryptogarage.util.Awake;
 import de.wladimircomputin.cryptogarage.util.GaragePing;
@@ -35,7 +32,7 @@ public class GarageService extends Service {
     private String ssid;
     private String pass;
     private String wifimode;
-    private int autotrigger_timeout;
+    private String remote_url;
 
     private GarageServiceCallbacks callbacks;
 
@@ -59,18 +56,30 @@ public class GarageService extends Service {
         return binder;
     }
 
-    /** method for clients */
+    /**
+     * method for clients
+     */
     public void init(SharedPreferences sharedPref, GarageServiceCallbacks callbacks) {
         this.ip = sharedPref.getString(getString(R.string.preference_ip_key), getString(R.string.preference_ip_default));
         this.devPass = sharedPref.getString(getString(R.string.preference_devpass_key), getString(R.string.preference_devpass_default));
         this.ssid = sharedPref.getString(getString(R.string.preference_wlanssid_key), getString(R.string.preference_wlanssid_default));
         this.pass = sharedPref.getString(getString(R.string.preference_wlanpass_key), getString(R.string.preference_wlanpass_default));
-        this.autotrigger_timeout = Integer.valueOf(sharedPref.getString(getString(R.string.preference_autotrigger_timeout_key), getString(R.string.preference_autotrigger_timeout_default))) * 1000;
         this.wifimode = sharedPref.getString(getString(R.string.preference_wifimode_key), getString(R.string.preference_wifimode_default));
+        this.remote_url = sharedPref.getString(getString(R.string.preference_remote_key), getString(R.string.preference_remote_default));
         this.callbacks = callbacks;
 
-        wifi = WiFi.instance(this.getApplicationContext());
-        cc = new CryptCon(devPass, ip, this, true);
+        if (!wifimode.equals("Remote")) {
+            wifi = WiFi.instance(this.getApplicationContext());
+            cc = new CryptCon(devPass, ip, this);
+        } else {
+            if (remote_url.contains(":")) {
+                String server = remote_url.split(":")[0];
+                int port = Integer.parseInt(remote_url.split(":")[1]);
+                cc = new CryptCon(devPass, server, port, port, this);
+            }
+
+        }
+
         vib = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         garagePing = new GaragePing(2, cc, this.getApplicationContext());
     }
@@ -79,30 +88,37 @@ public class GarageService extends Service {
         this.callbacks = callbacks;
     }
 
-    public void init_wifi(BroadcastReceiver receiver, boolean aggressiveConnect){
-        if(!wifi.isWifiEnabled()) {
-            wifi.setWifiEnabled(true);
-        }
-        try {
-            this.registerReceiver(receiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
-        } catch (Exception x){}
-        if(!wifi.isConnectedTo(ssid)) {
-            if(wifimode.equals("Hybrid")){
-                ssid = getString(R.string.ap_hybrid_default);
+    public void init_wifi(BroadcastReceiver receiver, boolean aggressiveConnect) {
+        if (!wifimode.equals("Remote")) {
+            if (!wifi.isWifiEnabled()) {
+                wifi.setWifiEnabled(true);
             }
-            wifi.connectToSSID(ssid, pass);
-            if(aggressiveConnect){
-                wifi.aggressiveConnect(ssid);
+
+            try {
+                this.registerReceiver(receiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+            } catch (Exception x) {
             }
-            callbacks.wifiDisconnected();
-        } else {
-            callbacks.wifiAlreadyConnected();
+            if (!wifi.isConnectedTo(ssid)) {
+                if (wifimode.equals("Hybrid")) {
+                    ssid = getString(R.string.ap_hybrid_default);
+                }
+                wifi.connectToSSID(ssid, pass);
+                if (aggressiveConnect) {
+                    wifi.aggressiveConnect(ssid);
+                }
+                callbacks.wifiDisconnected();
+            } else {
+                callbacks.wifiAlreadyConnected();
+            }
         }
     }
 
     @Override
     public void onDestroy() {
-        unregisterReceiver(wifi_init_receiver);
+        try {
+            unregisterReceiver(wifi_init_receiver);
+        } catch (Exception x) {
+        }
     }
 
     public BroadcastReceiver wifi_init_receiver = new BroadcastReceiver() {
@@ -110,7 +126,7 @@ public class GarageService extends Service {
         @Override
         public void onReceive(Context arg0, Intent arg1) {
             if (wifi.isConnectedTo(ssid)) {
-                //wifi.bindOnNetwork();
+                wifi.bindOnNetwork();
                 callbacks.wifiConnected();
             } else {
                 callbacks.wifiDisconnected();
@@ -123,17 +139,19 @@ public class GarageService extends Service {
 
         @Override
         public void onReceive(Context arg0, Intent arg1) {
-            if(wifi.isConnectedTo(ssid) && !autotrigger_active) {
+            if (wifi.isConnectedTo(ssid) && !autotrigger_active) {
                 NetworkInfo info = arg1.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-                if(info != null && info.isConnected()){
+                if (info != null && info.isConnected()) {
                     autotriggerStopSearch();
                     callbacks.autotriggerStart();
                     failsafe_trigger(new CryptConReceiver() {
                         @Override
-                        public void onSuccess(Content response) {}
+                        public void onSuccess(Content response) {
+                        }
 
                         @Override
-                        public void onFail() {}
+                        public void onFail() {
+                        }
 
                         @Override
                         public void onFinished() {
@@ -150,12 +168,13 @@ public class GarageService extends Service {
             } else if (!wifi.isConnectedTo(ssid) && autotrigger_active) {
                 garagePing.disableAutotriggerPing(true);
             } else if (wifi.isConnectedTo(ssid) && autotrigger_active) {
-                vib.vibrate(new long[] {0, 200}, -1);
+                vib.vibrate(new long[]{0, 200}, -1);
                 callbacks.autotriggerCountdown(true);
                 autotrigger_handler.removeCallbacks(autotrigger_finish);
                 garagePing.enableAutotriggerPing(new GaragePingReceiver() {
                     @Override
-                    public void onPingSuccess() {}
+                    public void onPingSuccess() {
+                    }
 
                     @Override
                     public void onPingFail(int count) {
@@ -167,20 +186,24 @@ public class GarageService extends Service {
                         prepareAutotriggerEnd();
                     }
                 });
-            } else if (!wifi.isConnectedTo(ssid) && !autotrigger_active){
+            } else if (!wifi.isConnectedTo(ssid) && !autotrigger_active) {
             }
         }
     };
 
-    public void autotriggerStopSearch(){
-        wifi.stopAgressiveConnect();
+    public void autotriggerStopSearch() {
+        if(!wifimode.equals("Remote")) {
+            wifi.stopAgressiveConnect();
+        }
         garagePing.disableAutotriggerPing(false);
-        try{
+        try {
             GarageService.this.unregisterReceiver(autotrigger_receiver);
-        } catch (Exception x){}
+        } catch (Exception x) {
+        }
     }
 
     private void prepareAutotriggerEnd() {
+        /*
         if (autotrigger_active) {
             vib.vibrate(new long[]{0, 200, 150, 200, 150, 200}, -1);
             int temp = autotrigger_timeout > 500 ? autotrigger_timeout - 500 : autotrigger_timeout;
@@ -188,6 +211,7 @@ public class GarageService extends Service {
             wifi.setWifiEnabled(false);
             callbacks.autotriggerCountdown(false);
         }
+         */
     }
 
     public Runnable autotrigger_finish = new Runnable() {
@@ -195,26 +219,32 @@ public class GarageService extends Service {
         public void run() {
             autotrigger_active = false;
             garagePing.disableAutotriggerPing(false);
-            vib.vibrate(new long[] {0, 300, 200, 300}, -1);
-            try{
+            vib.vibrate(new long[]{0, 300, 200, 300}, -1);
+            try {
                 GarageService.this.unregisterReceiver(autotrigger_receiver);
-            } catch (Exception x){}
+            } catch (Exception x) {
+            }
             callbacks.autotriggerCycleEnd();
         }
     };
 
-    public boolean isAutotrigger_active(){
+    public boolean isAutotrigger_active() {
         return autotrigger_active;
     }
-    public boolean isAutotrigger_searching(){
-        return wifi.isAggressiveConnectRunning();
+
+    public boolean isAutotrigger_searching() {
+        if(!wifimode.equals("Remote")) {
+            return wifi.isAggressiveConnectRunning();
+        } else {
+            return false;
+        }
     }
 
     private int failcount = 0;
     private final int failcount_limit = 3;
     private Handler later = new Handler();
 
-    public void failsafe_trigger(CryptConReceiver c, long delay){
+    public void failsafe_trigger(CryptConReceiver c, long delay) {
         later.postDelayed(() -> {
             trigger(new CryptConReceiver() {
                 @Override
@@ -226,21 +256,22 @@ public class GarageService extends Service {
 
                 @Override
                 public void onFail() {
-                    if(failcount < failcount_limit){
+                    if (failcount < failcount_limit) {
                         callbacks.logMessage("Trying again...");
-                        if (Looper.myLooper()==null)
+                        if (Looper.myLooper() == null)
                             Looper.prepare();
                         failcount++;
                         failsafe_trigger(this, 250);
                     } else {
-                        later.postDelayed(()->failcount = 0, delay * 2);
+                        later.postDelayed(() -> failcount = 0, delay * 2);
                         c.onFail();
                         c.onFinished();
                     }
                 }
 
                 @Override
-                public void onFinished() {}
+                public void onFinished() {
+                }
 
                 @Override
                 public void onProgress(String sprogress, int iprogress) {
@@ -250,9 +281,9 @@ public class GarageService extends Service {
         }, delay);
     }
 
-    public void trigger(final CryptConReceiver c){
+    public void trigger(final CryptConReceiver c) {
         callbacks.triggerStart();
-        cc.sendMessageEncrypted(getString(R.string.command_trigger), new CryptConReceiver() {
+        cc.sendMessageEncrypted(getString(R.string.command_trigger), CryptCon.Mode.UDP, new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
                 autotriggerStopSearch();
@@ -278,14 +309,14 @@ public class GarageService extends Service {
         });
     }
 
-    public void autotrigger(final CryptConReceiver c){
+    public void autotrigger(final CryptConReceiver c) {
         callbacks.autotriggerStart();
         garagePing.disableAutotriggerPing(false);
-        cc.sendMessageEncrypted(getString(R.string.command_autotrigger), new CryptConReceiver() {
+        cc.sendMessageEncrypted(getString(R.string.command_autotrigger), CryptCon.Mode.UDP, new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
                 autotrigger_active = !autotrigger_active;
-                if(autotrigger_active) {
+                if (autotrigger_active) {
                     garagePing.enableAutotriggerPing(new GaragePingReceiver() {
                         @Override
                         public void onPingSuccess() {
@@ -325,12 +356,12 @@ public class GarageService extends Service {
         });
     }
 
-    public void getGateState(final CryptConReceiver c){
+    public void getGateState(final CryptConReceiver c) {
         cc.sendMessageEncrypted(getString(R.string.command_gatestate), CryptCon.Mode.UDP, 1, c);
     }
 
-    public void reboot(final CryptConReceiver c){
-        cc.sendMessageEncrypted(getString(R.string.command_reboot), new CryptConReceiver() {
+    public void reboot(final CryptConReceiver c) {
+        cc.sendMessageEncrypted(getString(R.string.command_reboot), CryptCon.Mode.UDP, new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
                 c.onSuccess(response);
@@ -353,8 +384,8 @@ public class GarageService extends Service {
         });
     }
 
-    public void getStatus(final CryptConReceiver c){
-        cc.sendMessageEncrypted(getString(R.string.command_status), new CryptConReceiver() {
+    public void getStatus(final CryptConReceiver c) {
+        cc.sendMessageEncrypted(getString(R.string.command_status), CryptCon.Mode.UDP, new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
                 c.onSuccess(response);
