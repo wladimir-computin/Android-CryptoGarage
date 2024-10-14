@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="app_name" translatable="false">Garage</string>
     <string name="title_activity_settings">Settings</string>
     <string name="settings_devpass_textview">Gerätepasswort</string>
@@ -36,5 +36,5 @@
     <string name="autotriggerButton_Text">AUTOMATIK</string>
     <string name="about_author">Code &amp; Design: David Wischnjak</string>
     <string name="about_source">Source: https://github.com/wladimir-computin/Android-CryptoGarage</string>
-
+    <string name="ap_hybrid_default" translatable="false">CryptoGarage</string>
 </resources>

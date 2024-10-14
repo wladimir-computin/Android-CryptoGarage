@@ -6,9 +6,6 @@ package de.wladimircomputin.cryptogarage;
 
 public interface GarageServiceCallbacks {
     void triggerStart();
-    void autotriggerStart();
-    void autotriggerCountdown(boolean stop);
-    void autotriggerCycleEnd();
     void logMessage(String message);
     void setProgress(String progressbar, int progress);
     void wifiAlreadyConnected();

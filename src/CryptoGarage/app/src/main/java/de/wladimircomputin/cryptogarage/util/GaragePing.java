@@ -3,10 +3,10 @@ package de.wladimircomputin.cryptogarage.util;
 import android.content.Context;
 import android.os.Handler;
 
-import de.wladimircomputin.cryptogarage.R;
-import de.wladimircomputin.libcryptogarage.protocol.Content;
-import de.wladimircomputin.libcryptogarage.protocol.CryptCon;
-import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
+import de.wladimircomputin.libcryptoiot.v2.Constants;
+import de.wladimircomputin.libcryptoiot.v2.protocol.Content;
+import de.wladimircomputin.libcryptoiot.v2.protocol.CryptCon;
+import de.wladimircomputin.libcryptoiot.v2.protocol.CryptConReceiver;
 
 /**
  * Created by spamd on 26.03.2017.
@@ -57,7 +57,7 @@ public class GaragePing {
         @Override
         public void run() {
             final Runnable me = this;
-            cc.sendMessageEncrypted(context.getString(R.string.command_ping), CryptCon.Mode.UDP, new CryptConReceiver() {
+            cc.sendMessageEncrypted(Constants.command_ping, CryptCon.Mode.UDP, new CryptConReceiver() {
                 @Override
                 public void onSuccess(Content response) {
                     pingFails = 0;

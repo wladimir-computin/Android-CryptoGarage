@@ -24,24 +24,24 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityCompat;
 
 import de.wladimircomputin.cryptogarage.util.GateState;
 import de.wladimircomputin.cryptogarage.util.WiFi;
-import de.wladimircomputin.libcryptogarage.protocol.Content;
-import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
+import de.wladimircomputin.libcryptoiot.v2.protocol.Content;
+import de.wladimircomputin.libcryptoiot.v2.protocol.CryptConReceiver;
 
 public class MainActivity extends AppCompatActivity implements GarageServiceCallbacks{
 
@@ -50,11 +50,9 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
 
     Button triggerButton;
     ImageView statusImageView;
-    Button autotriggerButton;
+    ImageView statusImageViewAnim;
     TextView logTextView;
     ProgressBar triggerProgress;
-    ProgressBar autotriggerProgress;
-    ProgressBar autotriggerProgress_indeterminate;
 
     WiFi wifi;
     SharedPreferences sharedPref;
@@ -76,10 +74,8 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         logTextView = findViewById(R.id.logTextView);
         triggerButton = findViewById(R.id.triggerButton);
         statusImageView = findViewById(R.id.statusImageView);
-        autotriggerButton = findViewById(R.id.autotriggerButton);
+        statusImageViewAnim = findViewById(R.id.statusImageViewAnim);
         triggerProgress = findViewById(R.id.triggerButton_progress);
-        autotriggerProgress = findViewById(R.id.autotriggerButton_progress);
-        autotriggerProgress_indeterminate = findViewById(R.id.autotriggerButton_progress_indeterminate);
         final ScrollView sc = findViewById(R.id.sc);
         logTextView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -115,7 +111,8 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     @Override
     protected void onResume(){
         super.onResume();
-        attachUpdateGatestate(500);
+        triggerProgress.setProgress(0);
+        attachUpdateGatestate(100);
     }
 
     @Override
@@ -207,30 +204,10 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     }
 
     public void trigger_click(View view) {
-        garage.autotriggerStopSearch();
         if(!wifimode.equals("Remote")) {
             garage.init_wifi(garage.wifi_init_receiver, false);
         }
         trigger();
-    }
-
-    public void autotrigger_click(View view) {
-        if(!wifimode.equals("Remote")) {
-            if (wifi.isConnectedTo(ssid)) {
-                autotrigger();
-            } else if (garage.isAutotrigger_searching()) {
-                garage.autotriggerStopSearch();
-                setProgressIndeterminate(false);
-            } else if (!garage.isAutotrigger_active()) {
-                setProgressIndeterminate(true, 1);
-                garage.init_wifi(garage.autotrigger_receiver, true);
-            } else if (garage.isAutotrigger_active()) {
-                garage.autotrigger_finish.run();
-                setProgressIndeterminate(false);
-            }
-        } else {
-            trigger();
-        }
     }
 
     public void menu_reboot_click(){
@@ -243,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
             @Override
             public void run() {
                 updateGateState(null);
-                gateStateHandler.postDelayed(this, 5000);
+                gateStateHandler.postDelayed(this, 1000);
             }
         }, after);
     }
@@ -256,7 +233,6 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         garage.failsafe_trigger(new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
-                setProgressIndeterminate(false);
             }
 
             @Override
@@ -289,43 +265,6 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         }, 0);
     }
 
-    public void autotrigger(){
-        garage.autotrigger( new CryptConReceiver() {
-            @Override
-            public void onSuccess(Content response) {
-            }
-
-            @Override
-            public void onFail() {
-                runOnUiThread(() -> {
-                    final int old = autotriggerButton.getCurrentTextColor();
-                    autotriggerButton.setTextColor(Color.RED);
-                    (new Handler()).postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            autotriggerButton.setTextColor(old);
-                        }
-                    }, 1500);
-                });
-            }
-
-            @Override
-            public void onFinished() {
-                setProgress("autotrigger", -1);
-                setProgressIndeterminate(garage.isAutotrigger_active());
-                attachUpdateGatestate(300);
-            }
-
-            @Override
-            public void onProgress(String sprogress, int iprogress) {
-                runOnUiThread(() -> {
-                    logTextView.append(sprogress);
-                    setProgressAnimate(autotriggerProgress, iprogress);
-                });
-            }
-        });
-    }
-
     public void reboot(){
         garage.reboot(new CryptConReceiver() {
 
@@ -348,65 +287,43 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     }
 
     public void updateGateState(View view){
-        garage.getGateState(new CryptConReceiver() {
-            @Override
-            public void onSuccess(Content response) {
-                runOnUiThread(() -> {
-                    triggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
-                    autotriggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
-                    GateState gateState = GateState.valueOf(response.data);
-                    if(!gateState.equals(currentGateState)) {
-                        AnimatorSet animatorSet = (AnimatorSet) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.gate_state_transition_1);
-                        animatorSet.setTarget(statusImageView);
-                        animatorSet.start();
-                        animatorSet.addListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation, boolean isReverse) {
-                                statusImageView.setImageDrawable(getDrawable(gateState.getIcon()));
-                                AnimatorSet animatorSet = (AnimatorSet) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.gate_state_transition_2);
-                                animatorSet.setTarget(statusImageView);
-                                animatorSet.start();
-                            }
-                        });
-                        currentGateState = gateState;
-                    }
-                });
-            }
+        if(garage != null) {
+            garage.getGateState(new CryptConReceiver() {
+                @Override
+                public void onSuccess(Content response) {
+                    runOnUiThread(() -> {
+                        triggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
+                        GateState gateState = GateState.valueOf(response.data);
+                        if (!gateState.equals(currentGateState)) {
+                            animateGateStateChange(gateState);
+                            currentGateState = gateState;
+                        }
+                    });
+                }
 
-            @Override
-            public void onFail() {
-                runOnUiThread(() -> {
-                    triggerButton.setTextColor(Color.GRAY);
-                    autotriggerButton.setTextColor(Color.GRAY);
-                    GateState gateState = GateState.GATE_NONE;
-                    if(!gateState.equals(currentGateState)) {
-                        AnimatorSet animatorSet = (AnimatorSet) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.gate_state_transition_1);
-                        animatorSet.setTarget(statusImageView);
-                        animatorSet.start();
-                        animatorSet.addListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation, boolean isReverse) {
-                                statusImageView.setImageDrawable(getDrawable(gateState.getIcon()));
-                                AnimatorSet animatorSet = (AnimatorSet) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.gate_state_transition_2);
-                                animatorSet.setTarget(statusImageView);
-                                animatorSet.start();
-                            }
-                        });
-                        currentGateState = gateState;
-                    }
-                });
-            }
+                @Override
+                public void onFail() {
+                    runOnUiThread(() -> {
+                        triggerButton.setTextColor(Color.GRAY);
+                        GateState gateState = GateState.GATE_NONE;
+                        if (!gateState.equals(currentGateState)) {
+                            animateGateStateChange(gateState);
+                            currentGateState = gateState;
+                        }
+                    });
+                }
 
-            @Override
-            public void onFinished() {
+                @Override
+                public void onFinished() {
 
-            }
+                }
 
-            @Override
-            public void onProgress(String sprogress, int iprogress) {
+                @Override
+                public void onProgress(String sprogress, int iprogress) {
 
-            }
-        });
+                }
+            });
+        }
     }
 
     public void getStatus(){
@@ -451,12 +368,45 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         } else {
             runOnUiThread(() -> {
                 if(progressbar.equals("autotrigger")){
-                    setProgressAnimate(autotriggerProgress, progress);
                 } else {
                     setProgressAnimate(triggerProgress, progress);
                 }
             });
         }
+    }
+
+    private void animateGateStateChange(GateState newGateState){
+        AnimatorSet animatorSet = (AnimatorSet) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.gate_state_transition_1);
+        AnimatorSet animatorSet2 = (AnimatorSet) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.gate_state_transition_2);
+        animatorSet.setTarget(statusImageViewAnim);
+        animatorSet2.setTarget(statusImageView);
+        animatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation, boolean isReverse) {
+                super.onAnimationStart(animation, isReverse);
+                statusImageViewAnim.setImageDrawable(statusImageView.getDrawable());
+                statusImageViewAnim.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation, boolean isReverse) {
+                statusImageViewAnim.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        animatorSet2.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation, boolean isReverse) {
+                super.onAnimationStart(animation, isReverse);
+                statusImageView.setImageDrawable(AppCompatResources.getDrawable(MainActivity.this, newGateState.getIcon()));
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation, boolean isReverse) {
+            }
+        });
+        animatorSet.start();
+        animatorSet2.start();
     }
 
     private void setProgressAnimate(ProgressBar pb, int progressTo) {
@@ -466,69 +416,9 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
         animation.start();
     }
 
-    private void setProgressIndeterminate(boolean indeterminate) {
-        setProgressIndeterminate(indeterminate, 0);
-    }
-
-    private void setProgressIndeterminate(boolean indeterminate, int mode) {
-        runOnUiThread(() -> {
-            if (indeterminate){
-                //setProgressAnimate(autotriggerProgress, 0, 0);
-                Interpolator i;
-                switch (mode){
-                    case 0:
-                        i = new DecelerateInterpolator();
-                        if(!autotriggerProgress_indeterminate.getInterpolator().equals(i))
-                            autotriggerProgress_indeterminate.setInterpolator(i);
-                        break;
-
-                    case 1:
-                        i = new AccelerateInterpolator();
-                        if(!autotriggerProgress_indeterminate.getInterpolator().equals(i))
-                            autotriggerProgress_indeterminate.setInterpolator(i);
-                        break;
-                }
-                autotriggerProgress_indeterminate.setVisibility(View.VISIBLE);
-            } else {
-                autotriggerProgress_indeterminate.setVisibility(View.GONE);
-            }
-        });
-    }
-
     @Override
     public void triggerStart() {
 
-    }
-
-    @Override
-    public void autotriggerStart() {
-        runOnUiThread(() -> {
-            autotriggerProgress.setProgress(0);
-            setProgressIndeterminate(false);
-        });
-    }
-
-    @Override
-    public void autotriggerCountdown(boolean stop) {
-    /*    runOnUiThread(() -> {
-            if(!stop) {
-                setProgressIndeterminate(false);
-                if (autotrigger_timeout > 1) {
-                    ObjectAnimator animation = ObjectAnimator.ofInt(autotriggerProgress, "progress", 100 * 10, 0);
-                    animation.setDuration((autotrigger_timeout * 1000) - 1000);
-                    animation.setInterpolator(new LinearInterpolator());
-                    animation.setAutoCancel(true);
-                    animation.start();
-                }
-            } else {
-                setProgressIndeterminate(true);
-            }
-        });*/
-    }
-
-    @Override
-    public void autotriggerCycleEnd() {
-        //finish();
     }
 
     @Override
@@ -542,7 +432,6 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     public void wifiConnected() {
         runOnUiThread(() -> {
             triggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
-            autotriggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
         });
     }
 
@@ -550,7 +439,6 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     public void wifiAlreadyConnected() {
         runOnUiThread(() -> {
             triggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
-            autotriggerButton.setTextColor(getResources().getColor(R.color.colorAccent));
         });
     }
 
@@ -558,7 +446,6 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
     public void wifiDisconnected() {
         runOnUiThread(() -> {
             triggerButton.setTextColor(Color.GRAY);
-            autotriggerButton.setTextColor(Color.GRAY);
         });
 
     }
@@ -575,7 +462,6 @@ public class MainActivity extends AppCompatActivity implements GarageServiceCall
             if(!wifimode.equals("Remote")) {
                 garage.init_wifi(garage.wifi_init_receiver, false);
             }
-            setProgressIndeterminate(garage.isAutotrigger_active() || garage.isAutotrigger_searching());
         }
 
         @Override

@@ -1,7 +1,6 @@
 package de.wladimircomputin.cryptogarage;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
@@ -18,16 +17,16 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.wladimircomputin.cryptogarage.util.Updater;
-import de.wladimircomputin.libcryptogarage.net.ConReceiver;
-import de.wladimircomputin.libcryptogarage.protocol.Content;
-import de.wladimircomputin.libcryptogarage.protocol.CryptCon;
-import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
+import de.wladimircomputin.libcryptoiot.v2.Constants;
+import de.wladimircomputin.libcryptoiot.v2.protocol.Content;
+import de.wladimircomputin.libcryptoiot.v2.protocol.CryptCon;
+import de.wladimircomputin.libcryptoiot.v2.protocol.CryptConDiscoverReceiver;
+import de.wladimircomputin.libcryptoiot.v2.protocol.CryptConReceiver;
+import de.wladimircomputin.libcryptoiot.v2.protocol.DiscoveryDevice;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -74,7 +73,7 @@ public class SettingsActivity extends AppCompatActivity {
                 wifimode_ip_layout.setVisibility(list.get(position).equals("AP") ?  View.VISIBLE : View.GONE);
                 wifimode_remote_layout.setVisibility(list.get(position).equals("Remote") ? View.VISIBLE : View.GONE);
                 if (list.get(position).equals("AP")) {
-                    wifimode_ip_text.setText(getString(R.string.ap_ip_default));
+                    wifimode_ip_text.setText(Constants.ap_ip_default);
                 }
 
             }
@@ -97,12 +96,12 @@ public class SettingsActivity extends AppCompatActivity {
 
 
         if(!wifimode.equals("Remote")){
-            cc = new CryptCon(devPass, ip, this);
+            cc = new CryptCon(devPass, ip);
         } else {
             if(remote_url.contains(":")){
                 String server = remote_url.split(":")[0];
                 int port = Integer.parseInt(remote_url.split(":")[1]);
-                cc = new CryptCon(devPass, server, port, port, this);
+                cc = new CryptCon(devPass, server + ":" + port);
             }
 
         }
@@ -153,7 +152,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public void reboot() {
-        cc.sendMessageEncrypted(getString(R.string.command_reboot), new CryptConReceiver() {
+        cc.sendMessageEncrypted(Constants.command_reboot, new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
             }
@@ -176,65 +175,12 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public void update_mode() {
-        cc.sendMessageEncrypted(getString(R.string.command_update), new CryptConReceiver() {
+        cc.sendMessageEncrypted(Constants.command_update, new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
                 runOnUiThread(() -> {
                     Toast.makeText(SettingsActivity.this, "Update server enabled on\n" + response.data, Toast.LENGTH_LONG).show();
                 });
-
-                File update = new File(getExternalFilesDir(null), "CryptoGarage.bin");
-
-                if (update.exists()) {
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
-
-                    builder.setTitle("Firmware Update");
-                    builder.setMessage("Found binary firmware file \"CryptoGarage.bin\". \n Upload?");
-
-                    builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-
-                        public void onClick(DialogInterface dialog, int which) {
-                            runOnUiThread(() -> {
-                                Toast.makeText(SettingsActivity.this, "Uploading new firmware...", Toast.LENGTH_LONG).show();
-                            });
-                            Updater updater = new Updater(response.data, update);
-
-                            updater.startUpdate(new ConReceiver() {
-                                @Override
-                                public void onResponseReceived(String responseData) {
-                                    runOnUiThread(() -> {
-                                        Toast.makeText(SettingsActivity.this, responseData, Toast.LENGTH_LONG).show();
-                                    });
-                                }
-
-                                @Override
-                                public void onError(String reason) {
-                                    runOnUiThread(() -> {
-                                        Toast.makeText(SettingsActivity.this, "Error: " + reason, Toast.LENGTH_LONG).show();
-                                    });
-                                }
-                            });
-
-                            dialog.dismiss();
-                        }
-                    });
-
-                    builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            // Do nothing
-                            dialog.dismiss();
-                        }
-                    });
-
-                    runOnUiThread(() -> {
-                        AlertDialog alert = builder.create();
-                        alert.show();
-                    });
-                }
             }
 
             @Override
@@ -255,7 +201,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public void reset() {
-        cc.sendMessageEncrypted(getString(R.string.command_reset), new CryptConReceiver() {
+        cc.sendMessageEncrypted(Constants.command_reset, new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
                 runOnUiThread(() -> {
@@ -279,7 +225,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public void getStatus() {
-        cc.sendMessageEncrypted(getString(R.string.command_status), new CryptConReceiver() {
+        cc.sendMessageEncrypted(Constants.command_status, new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
                 runOnUiThread(() -> {
@@ -310,14 +256,16 @@ public class SettingsActivity extends AppCompatActivity {
 
     public void scan_click(View view) {
         wifimode_progress.setVisibility(View.VISIBLE);
-        cc.discoverDevices(new CryptConReceiver() {
+        cc.discoverDevices(new CryptConDiscoverReceiver() {
+
             @Override
-            public void onSuccess(Content response) {
-                String[] device = response.data.split(":");
-                runOnUiThread(() -> {
-                    Toast.makeText(SettingsActivity.this, "Found device " + device[0] + " with IP " + device[1], Toast.LENGTH_SHORT).show();
-                    wifimode_ip_text.setText(device[1]);
-                });
+            public void onSuccess(List<DiscoveryDevice> results) {
+                if(results.size() >= 1) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(SettingsActivity.this, "Found device " + results.get(0).name + " with IP " + results.get(0).ip, Toast.LENGTH_SHORT).show();
+                        wifimode_ip_text.setText(results.get(0).ip);
+                    });
+                }
             }
 
             @Override
@@ -332,10 +280,6 @@ public class SettingsActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     wifimode_progress.setVisibility(View.GONE);
                 });
-            }
-
-            @Override
-            public void onProgress(String sprogress, int iprogress) {
             }
         });
     }

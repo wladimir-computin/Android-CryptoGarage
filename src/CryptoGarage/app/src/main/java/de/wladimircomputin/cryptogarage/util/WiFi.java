@@ -1,5 +1,8 @@
 package de.wladimircomputin.cryptogarage.util;
 
+import static android.content.Context.CONNECTIVITY_SERVICE;
+import static android.content.Context.WIFI_SERVICE;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -14,9 +17,6 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 
 import androidx.core.app.ActivityCompat;
-
-import static android.content.Context.CONNECTIVITY_SERVICE;
-import static android.content.Context.WIFI_SERVICE;
 
 /**
  * Created by spamd on 09.03.2017.

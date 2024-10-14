@@ -22,8 +22,8 @@ import android.widget.TextView;
 
 import de.wladimircomputin.cryptogarage.util.Awake;
 import de.wladimircomputin.cryptogarage.util.WiFi;
-import de.wladimircomputin.libcryptogarage.protocol.Content;
-import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
+import de.wladimircomputin.libcryptoiot.v2.protocol.Content;
+import de.wladimircomputin.libcryptoiot.v2.protocol.CryptConReceiver;
 
 public class Garage extends WearableActivity implements GarageServiceCallbacks{
 

@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Handler;
@@ -13,9 +12,10 @@ import android.os.IBinder;
 import android.os.Looper;
 
 import de.wladimircomputin.cryptogarage.util.WiFi;
-import de.wladimircomputin.libcryptogarage.protocol.Content;
-import de.wladimircomputin.libcryptogarage.protocol.CryptCon;
-import de.wladimircomputin.libcryptogarage.protocol.CryptConReceiver;
+import de.wladimircomputin.libcryptoiot.v2.Constants;
+import de.wladimircomputin.libcryptoiot.v2.protocol.Content;
+import de.wladimircomputin.libcryptoiot.v2.protocol.CryptCon;
+import de.wladimircomputin.libcryptoiot.v2.protocol.CryptConReceiver;
 
 public class GarageService extends Service {
     private final IBinder binder = new LocalBinder();
@@ -48,7 +48,7 @@ public class GarageService extends Service {
         this.pass = pass;
         this.callbacks = callbacks;
         wifi = new WiFi(this.getApplicationContext());
-        cc = new CryptCon(ip, devPass, this);
+        cc = new CryptCon(ip, devPass);
     }
 
     public void setCallbacks(GarageServiceCallbacks callbacks) {
@@ -86,7 +86,7 @@ public class GarageService extends Service {
     public void trigger(final CryptConReceiver c){
         callbacks.triggerStart();
         if(wifi.isConnectedTo(ssid)){
-            cc.sendMessageEncrypted(getString(R.string.command_trigger), new CryptConReceiver() {
+            cc.sendMessageEncrypted("trigger", new CryptConReceiver() {
                 @Override
                 public void onSuccess(Content response) {
                     c.onSuccess(response);
@@ -153,7 +153,7 @@ public class GarageService extends Service {
     }
 
     public void reboot(final CryptConReceiver c){
-        cc.sendMessageEncrypted(getString(R.string.command_reboot), new CryptConReceiver() {
+        cc.sendMessageEncrypted(Constants.command_reboot, new CryptConReceiver() {
             @Override
             public void onSuccess(Content response) {
                 c.onSuccess(response);

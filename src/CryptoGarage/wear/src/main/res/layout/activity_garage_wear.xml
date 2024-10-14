@@ -28,4 +28,4 @@
         android:onClick="trigger_click"
         android:text="@string/triggerButton_Text"
         android:textSize="20sp" />
-        </FrameLayout>
+</FrameLayout>

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingBottom="0dp"
+    tools:context="de.wladimircomputin.cryptogarage.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:weightSum="100">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="40">
+
+            <de.wladimircomputin.cryptogarage.SquareLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="false"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:animateLayoutChanges="true"
+                android:gravity="center"
+                android:padding="15dp"
+                android:translationZ="10dp">
+
+                <ProgressBar
+                    android:id="@+id/triggerButton_progress"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentLeft="false"
+                    android:layout_alignParentTop="false"
+                    android:layout_alignParentRight="false"
+                    android:layout_alignParentBottom="false"
+                    android:layout_centerInParent="false"
+                    android:layout_centerHorizontal="false"
+                    android:layout_centerVertical="false"
+                    android:indeterminate="false"
+                    android:interpolator="@android:anim/accelerate_interpolator"
+                    android:max="1000"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/circular_progressbar"
+                    android:rotation="-90"
+                    android:translationX="0dp"
+                    android:translationZ="10dp" />
+            </de.wladimircomputin.cryptogarage.SquareLayout>
+
+            <Button
+                android:id="@+id/triggerButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:backgroundTint="@color/colorRed"
+                android:onClick="trigger_click"
+                android:text="@string/triggerButton_Text"
+                android:textColor="@color/colorAccent"
+                android:textSize="18sp" />
+
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/statusImageView"
+            android:layout_width="120dip"
+            android:layout_height="120dip"
+            android:onClick="updateGateState"
+            android:translationZ="-10dp"
+            app:srcCompat="@drawable/unknown" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="40">
+
+            <de.wladimircomputin.cryptogarage.SquareLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="false"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:animateLayoutChanges="true"
+                android:gravity="center"
+                android:padding="10dp"
+                android:translationZ="10dp">
+
+                <ProgressBar
+                    android:id="@+id/autotriggerButton_progress_indeterminate"
+                    style="@style/Widget.AppCompat.ProgressBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:indeterminate="true"
+                    android:indeterminateBehavior="cycle"
+                    android:indeterminateDrawable="@drawable/circular_progressbar"
+                    android:indeterminateDuration="1000"
+                    android:interpolator="@android:anim/decelerate_interpolator"
+                    android:max="100"
+                    android:progress="0"
+                    android:rotation="-90"
+                    android:translationZ="10dp"
+                    android:visibility="gone" />
+
+            </de.wladimircomputin.cryptogarage.SquareLayout>
+
+            <de.wladimircomputin.cryptogarage.SquareLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="false"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:animateLayoutChanges="true"
+                android:gravity="center"
+                android:padding="10dp"
+                android:translationZ="10dp">
+
+                <ProgressBar
+                    android:id="@+id/autotriggerButton_progress"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:indeterminate="false"
+                    android:indeterminateBehavior="cycle"
+                    android:indeterminateDuration="1000"
+                    android:interpolator="@android:anim/decelerate_interpolator"
+                    android:max="1000"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/circular_progressbar"
+                    android:rotation="-90"
+                    android:translationZ="10dp"
+                    android:visibility="visible" />
+
+            </de.wladimircomputin.cryptogarage.SquareLayout>
+
+            <Button
+                android:id="@+id/autotriggerButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:backgroundTint="@color/colorRed"
+                android:onClick="autotrigger_click"
+                android:text="@string/autotriggerButton_Text"
+                android:textColor="@color/colorAccent"
+                android:textSize="18sp" />
+
+        </RelativeLayout>
+
+        <ScrollView
+            android:id="@+id/sc"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20"
+            android:fadeScrollbars="true"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fadeScrollbars="true"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/logTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/background_dark"
+                    android:fadeScrollbars="true"
+                    android:gravity="top"
+                    android:overScrollMode="never"
+                    android:requiresFadingEdge="vertical"
+                    android:scrollbars="vertical"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="14sp"
+                    android:typeface="monospace" />
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+</RelativeLayout>

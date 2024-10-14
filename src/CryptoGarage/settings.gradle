@@ -1,1 +1,1 @@
-include ':app', ':wear', ':libcryptogarage'
+include ':app', ':wear', ':libcryptoiot'

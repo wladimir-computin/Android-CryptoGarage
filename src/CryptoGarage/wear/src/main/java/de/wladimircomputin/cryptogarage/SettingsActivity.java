@@ -42,15 +42,13 @@ public class SettingsActivity extends WearableActivity {
     }
 
     public void save_click(View view){
+        //SettingsPack wlanPass = new SettingsPack(wlanpass_text, R.string.preference_wlanpass_key, R.string.preference_wlanpass_default, R.string.command_setWifiPass, null);
+        //SettingsPack wlanSSID = new SettingsPack(wlanssid_text, R.string.preference_wlanssid_key, R.string.preference_wlanssid_default, R.string.command_setSSID, wlanPass);
+        //SettingsPack devPass = new SettingsPack(devpass_text, R.string.preference_devpass_key, R.string.preference_devpass_default, R.string.command_setDevicePass, wlanSSID);
 
-        SettingsPack save = new SettingsPack(null, 0, 0, R.string.command_save, null);
-        SettingsPack wlanPass = new SettingsPack(wlanpass_text, R.string.preference_wlanpass_key, R.string.preference_wlanpass_default, R.string.command_setWifiPass, save);
-        SettingsPack wlanSSID = new SettingsPack(wlanssid_text, R.string.preference_wlanssid_key, R.string.preference_wlanssid_default, R.string.command_setSSID, wlanPass);
-        SettingsPack devPass = new SettingsPack(devpass_text, R.string.preference_devpass_key, R.string.preference_devpass_default, R.string.command_setDevicePass, wlanSSID);
-
-        devPass.saveLocale();
-        wlanSSID.saveLocale();
-        wlanPass.saveLocale();
+        //devPass.saveLocale();
+        //wlanSSID.saveLocale();
+        //wlanPass.saveLocale();
         Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show();
     }
 

@@ -4,8 +4,14 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CryptoGarage.iml" filepath="$PROJECT_DIR$/CryptoGarage.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/CryptoGarage.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/CryptoGarage.app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libcryptogarage/CryptoGarage.libcryptogarage.iml" filepath="$PROJECT_DIR$/.idea/modules/libcryptogarage/CryptoGarage.libcryptogarage.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/CryptoGarage.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/CryptoGarage.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/CryptoGarage.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/CryptoGarage.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libcryptogarage/CryptoGarage.libcryptoiot.iml" filepath="$PROJECT_DIR$/.idea/modules/libcryptogarage/CryptoGarage.libcryptoiot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libcryptoiot/CryptoGarage.libcryptoiot.main.iml" filepath="$PROJECT_DIR$/.idea/modules/libcryptoiot/CryptoGarage.libcryptoiot.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libcryptoiot/CryptoGarage.libcryptoiot.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/libcryptoiot/CryptoGarage.libcryptoiot.unitTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/wear/CryptoGarage.wear.iml" filepath="$PROJECT_DIR$/.idea/modules/wear/CryptoGarage.wear.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/wear/CryptoGarage.wear.main.iml" filepath="$PROJECT_DIR$/.idea/modules/wear/CryptoGarage.wear.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/wear/CryptoGarage.wear.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/wear/CryptoGarage.wear.unitTest.iml" />
     </modules>
   </component>
 </project>
